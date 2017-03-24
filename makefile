@@ -9,7 +9,7 @@ CFLAGS = -Wall
 
 CC = g++
 
-all: ShapeColorDetector.a clean
+all: ShapeColorDetector.a FlagInterface.a clean
 
 #define a rule that applies to all files ending in the .o suffix, which says that the .o file depends upon the .c version of the file and all the .h files included in the DEPS macro.  Compile each object file
 %.o: %.cpp
@@ -20,8 +20,11 @@ all: ShapeColorDetector.a clean
 ShapeColorDetector.a: $(OBJS)
 	$(CC) -o $@ $^ $(CFLAGS) -Wl,-rpath,libs/ $(LIBS)
 
+FlagInterface.a: src_interface/main_flags.o
+	$(CC) -o $@ $^ $(CFLAGS)
+
 #Cleanup
 .PHONY: clean
 
 clean:
-	rm -f src/*.o *~ core *~
+	rm -f src/*.o src_interface/*.o *~ core *~

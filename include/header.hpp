@@ -48,7 +48,4 @@ cv::Mat SetBlueMask(cv::Mat hsv);
 cv::Mat SetRedMask(cv::Mat hsv);
 cv::Mat SetCustomMask(cv::Mat hsv, uchar lower[], uchar upper[]);
 
-//Flags
-void test_Flags(int buffer[2*sizeof(int)]);
-
 #endif // MATH_H_INCLUDED

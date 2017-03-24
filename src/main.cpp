@@ -1,19 +1,7 @@
-#include <ctime>
-#include <cmath>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include </usr/local/include/raspicam/raspicam_cv.h>
-#include </usr/local/include/raspicam/raspicam.h>
-#include </usr/local/include/raspicam/raspicam_still_cv.h>
-#include </usr/local/include/raspicam/raspicamtypes.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include </usr/local/include/opencv2/opencv.hpp>
-#include <wiringPi.h>
-
 #include "header.hpp"
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #define TAILLE_BUFFER 2*sizeof(int)
 
@@ -32,160 +20,133 @@ bool save_image(RecognizedShape shape, string color);
 bool canSave(time_t &start, time_t &end, int interval);
 float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount);
 void setupPins();
+int setupNamedPipe();
 
-int main ( int argc,char **argv ) 
+int main ( int argc, char **argv ) 
 {
-	countRed = atoi(argv[1]);
-	countBlue = atoi(argv[2]);
-	countGlobal = atoi(argv[3]);
-
-
-	/*int descripteur[2];
-	// descripteur[0] = sortie du tube
-	// descripteur[1] = entrée du tube
-	
-	int buffer[TAILLE_BUFFER];
-	//buffer[4] = FAIL;
-	if(pipe(descripteur) !=0)
+	if(argc ==  3)
 	{
-		cout<<"Error creating tube"<<endl;
-		return EXIT_FAILURE;
-		buffer[4] = FAIL;
+		countRed = atoi(argv[1]);
+		countBlue = atoi(argv[2]);
+		countGlobal = atoi(argv[3]);
 	}
 	
-	pid_t pid;
-	pid = fork();
+	setupPins();	
+	int pipeDescriptor = setupNamedPipe();
 	
-	if (pid == -1)
-	{
-		cout<<"Error creating processus"<<endl;
-		return EXIT_FAILURE;
-		buffer[4] = FAIL;
-	}
+	int nCount=0;
+	time_t timer_begin,timer_end;
+	time_t timer_start_interval = 0, timer_end_interval = 0;
+	time_t begin = 0, fin = 0;
 	
-	if (pid != 0 )
+	cv::Mat image;
+	raspicam::RaspiCam_Cv camera;
+	
+	//set camera params
+	camera.set( CV_CAP_PROP_FORMAT, CV_8UC3 ); // CV_8UC3 = frame RGB; CV_8UC1 = frame gray;
+	camera.set( CV_CAP_PROP_FRAME_WIDTH,  640);
+	camera.set( CV_CAP_PROP_FRAME_HEIGHT, 480);
+	//camera.set(CV_CAP_PROP_FPS, 90);
+	
+
+	if (!camera.open()) {cerr<<"Error opening the camera"<<endl; return -1;}
+	cout<<"Camera opened..."<<endl;
+	
+	time ( &timer_begin ); // Lance le chrono
+	while(1)
 	{
-		close(descripteur[0]);*/
-		setupPins();	
-		int nCount=0;
-		time_t timer_begin,timer_end;
-		time_t timer_start_interval = 0, timer_end_interval = 0;
-		time_t begin = 0, fin = 0;
-		cv::Mat image;
-		raspicam::RaspiCam_Cv camera;
+		//Start capture
+		camera.grab();
+		camera.retrieve (image);
 		
-		//set camera params
-		camera.set( CV_CAP_PROP_FORMAT, CV_8UC3 ); // CV_8UC3 = frame RGB; CV_8UC1 = frame gray;
-		camera.set( CV_CAP_PROP_FRAME_WIDTH,  640);
-		camera.set( CV_CAP_PROP_FRAME_HEIGHT, 480);
-		//camera.set(CV_CAP_PROP_FPS, 90);
+#if	DEBUG>1
+		cv::imshow("frame", image);
+		cv::waitKey(50);
+#endif
+
+		// Image preprocessing : get the preprocessed image (in hsv)
+		cv::Mat hsv = preprocessing(image);
+	
+		// Défine range of red and blue color in HSV
+		cv::Mat blueMask = SetBlueMask(hsv);
+		cv::Mat redMask = SetRedMask(hsv);
 		
 
-		if (!camera.open()) {cerr<<"Error opening the camera"<<endl; return -1;}
-		cout<<"Camera opened..."<<endl;
+#if	DEBUG>1
+		cv::imshow("redmask", redMask);
+		cv::imshow("bluemask", blueMask);
+		cv::waitKey(50);
+#endif
+		// find contours in the thresholded image and initialize the shape detector
+		std::vector<std::vector<cv::Point> > contoursB;
+		findContours(blueMask.clone(), contoursB, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 		
-		time ( &timer_begin ); // Lance le chrono
-		while(1)
+		std::vector<std::vector<cv::Point> > contoursR;
+		findContours(redMask.clone(), contoursR, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		
+		// find shape
+		RecognizedShape shapeB = shapeDetectorBlue(image, contoursB);
+		RecognizedShape shapeR = shapeDetectorRed(image, contoursR);
+		
+		// save global image every 10 seconds	
+		if (canSave(begin, fin, INTERVAL_GLOBAL))	
 		{
-			//Start capture
-			camera.grab();
-			camera.retrieve (image);
-			
-			//cv::imshow("frame", image);
-			//cv::waitKey(50);
+			countGlobal ++;
+			stringstream filename_global;
+			filename_global<<filepathGlobal<<(countGlobal)<<fileFormat;
+			imwrite(filename_global.str(),image);
+			cout<<"Global image saved at "<<filename_global.str()<<endl;
+			time(&begin);
+			write(pipeDescriptor,"5", sizeof("5"));
+		}
 		
-			// Image preprocessing : get the preprocessed image (in hsv)
-			cv::Mat hsv = preprocessing(image);
-		
-			// Défine range of red and blue color in HSV
-			cv::Mat blueMask = SetBlueMask(hsv);
-			cv::Mat redMask = SetRedMask(hsv);
+		//save image
+		if(canSave(timer_start_interval, timer_end_interval, INTERVAL_SHAPE))
+		{	
+			//Try to save
+			bool saveR = save_image(shapeR,"RED");
+			bool saveB = save_image(shapeB,"BLUE");
 			
-
-	#if	DEBUG>1
-			cv::imshow("redmask", redMask);
-			cv::imshow("bluemask", blueMask);
-			cv::waitKey(50);
-	#endif
-			// find contours in the thresholded image and initialize the shape detector
-			std::vector<std::vector<cv::Point> > contoursB;
-			findContours(blueMask.clone(), contoursB, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-			
-			std::vector<std::vector<cv::Point> > contoursR;
-			findContours(redMask.clone(), contoursR, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-			
-			// find shape
-			RecognizedShape shapeB = shapeDetectorBlue(image, contoursB);
-			RecognizedShape shapeR = shapeDetectorRed(image, contoursR);
-			
-			// save global image every 10 seconds	
-			if (canSave(begin, fin, INTERVAL_GLOBAL))	
+			if(saveR)
 			{
-				countGlobal ++;
-				stringstream filename_global;
-				filename_global<<filepathGlobal<<(countGlobal)<<fileFormat;
-				imwrite(filename_global.str(),image);
-				cout<<"Global image saved at "<<filename_global.str()<<endl;
-				time(&begin);
+				write(pipeDescriptor,"0", sizeof("0"));
+				/*
+				digitalWrite (LIGHT_RED, HIGH) ;
+				delay(500);
+				digitalWrite (LIGHT_RED,  LOW) ; 
+				delay(500);		*/
+			}
+			if(saveB)
+			{
+				write(pipeDescriptor,"1", sizeof("1"));
+				/*digitalWrite (LIGHT_BLUE, HIGH) ;
+				delay(500);
+				digitalWrite (LIGHT_BLUE,  LOW) ; 
+				delay(500);*/
 			}
 			
-			//save image
-			if(canSave(timer_start_interval, timer_end_interval, INTERVAL_SHAPE))
-			{	
-				//Try to save
-				bool saveR = save_image(shapeR,"RED");
-				bool saveB = save_image(shapeB,"BLUE");
-				
-				if(saveR)
-				{
-					digitalWrite (LIGHT_RED, HIGH) ;
-					delay(500);
-					digitalWrite (LIGHT_RED,  LOW) ; 
-					delay(500);
-						
-				}
-				if(saveB)
-				{
-					digitalWrite (LIGHT_BLUE, HIGH) ;
-					delay(500);
-					digitalWrite (LIGHT_BLUE,  LOW) ; 
-					delay(500);
-				}
-				
-				if(saveR || saveB)
-				{
-					time ( &timer_start_interval );
-				}
-				
-				saveB = false;
-				saveR = false;
-				
+			if(saveR || saveB)
+			{
+				time ( &timer_start_interval );
 			}
 			
-			//if canSave()
-	#if	DEBUG>0
+			saveB = false;
+			saveR = false;
 			
-			//show time statistics
-			getFPS(timer_begin, timer_end, nCount);
-
-			// cout<< "\n Appuyez sur 'Entrée' pour terminer" <<endl;
-			//getchar();
-	#endif
 		}
 		
-		camera.release(); // Close the PiCam device
-		cout<< "\n Release done" << endl;
-		
-		return 0;
+		//if canSave()
+#if	DEBUG>0
+		//show time statistics
+		getFPS(timer_begin, timer_end, nCount);
+#endif
 	}
-
-	/*else{
-		while(1){
-			close(descripteur[1]);
-			read(descripteur[0], buffer, TAILLE_BUFFER);
-			test_Flags (buffer);
-		}
-	}*/
+	
+	camera.release(); // Close the PiCam device
+	cout<< "\n Release done" << endl;
+	
+	return 0;
+}
 
 
 /****** Functions *******/
@@ -284,5 +245,17 @@ void setupPins()
 	pinMode(3, OUTPUT);
 	pinMode(2, OUTPUT);
 	pinMode(16, OUTPUT);
+}
+
+int setupNamedPipe()
+{
+	int fd;
+	char * fifo_adas = "/tmp/fifo_adas";
+	
+	mkfifo(fifo_adas, 0666);
+	
+	fd = open(fifo_adas, O_WRONLY);
+	
+	return fd;
 }
 

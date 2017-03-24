@@ -1,8 +1,28 @@
-#include "header.hpp"
+#include <iostream>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
-void test_Flags(int buffer[2*sizeof(int)]) 
+using namespace std;
+
+#define MAX_BUFFER 1024
+
+int setupNamedPipe();
+
+int main(void) 
 {
-	int color_flag = buffer[0];
+	int pipeDescriptor = setupNamedPipe();
+	char buffer[MAX_BUFFER];
+	
+	
+	while(1)
+	{
+	
+		read(pipeDescriptor, buffer, MAX_BUFFER);
+		cout << "Received " << buffer << endl;
+	
+	}
+	/*int color_flag = buffer[0];
 	int fail_flag = buffer[4];
 	
 	wiringPiSetup () ;
@@ -30,7 +50,15 @@ void test_Flags(int buffer[2*sizeof(int)])
 			digitalWrite (FAIL, HIGH) ; delay (200) ;
 			digitalWrite (FAIL,  LOW) ; delay (500) ;
 		}
-	}
-		
+	}*/
+}
+
+int setupNamedPipe()
+{
+	int fd;
+	char * fifo_adas = "/tmp/fifo_adas";
 	
+	fd = open(fifo_adas, O_RDONLY);
+	
+	return fd;
 }
