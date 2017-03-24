@@ -1,3 +1,5 @@
-/ImagesSave/*
+/ImagesSave/Blue/*
+/ImagesSave/Red/*
+/ImagesSave/Global/*
 *.a
 *.o
