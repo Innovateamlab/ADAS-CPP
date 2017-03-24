@@ -87,8 +87,8 @@ int main ( int argc,char **argv )
 			camera.grab();
 			camera.retrieve (image);
 			
-			cv::imshow("frame", image);
-			cv::waitKey(50);
+			//cv::imshow("frame", image);
+			//cv::waitKey(50);
 		
 			// Image preprocessing : get the preprocessed image (in hsv)
 			cv::Mat hsv = preprocessing(image);
