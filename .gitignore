@@ -1,5 +1,9 @@
-/ImagesSave/Blue/*
-/ImagesSave/Red/*
-/ImagesSave/Global/*
+/ImagesSave/Blue/*.png
+/ImagesSave/Blue/*.jpg
+/ImagesSave/Red/*.png
+/ImagesSave/Red/*.jpg
+/ImagesSave/Global/*.png
+/ImagesSave/Global/*.jpg
+
 *.a
 *.o
