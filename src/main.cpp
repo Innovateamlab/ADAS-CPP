@@ -23,18 +23,20 @@ using namespace cv;
 string filepathRed = "ImagesSave/Red/imgCropRed_", filepathBlue = "ImagesSave/Blue/imgCropBlue_";
 string filepathGlobal = "ImagesSave/Global/imgGlobal_";
 string fileFormat = ".jpg";
-int CAPTURE_INTERVAL_S = 3;
+int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 10;
 
 int countRed = 0, countBlue = 0;
 int countGlobal = 0;
 
 bool save_image(RecognizedShape shape, string color);
-bool canSave(time_t &start, time_t &end);
+bool canSave(time_t &start, time_t &end, int interval);
+float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount);
+void setupPins();
 
 int main ( int argc,char **argv ) 
 {
 
-	int descripteur[2];
+	/*int descripteur[2];
 	// descripteur[0] = sortie du tube
 	// descripteur[1] = entrée du tube
 	
@@ -57,46 +59,37 @@ int main ( int argc,char **argv )
 		buffer[4] = FAIL;
 	}
 	
-	if (pid != 0 ){
-		close(descripteur[0]);
-	int nCount=100;
-    time_t timer_begin,timer_end;
-    time_t timer_start_interval = 0, timer_end_interval = 0;
-    
-    cv::Mat image;
-    
-	raspicam::RaspiCam_Cv camera;
-	
-	//set camera params
-    camera.set( CV_CAP_PROP_FORMAT, CV_8UC3 ); // CV_8UC3 = frame RGB; CV_8UC1 = frame gray;
-    camera.set( CV_CAP_PROP_FRAME_WIDTH, 640 );
-    camera.set( CV_CAP_PROP_FRAME_HEIGHT, 480 );
-    //camera.set(CV_CAP_PROP_FPS, 90);
-    
-
-    if (!camera.open()) {cerr<<"Error opening the camera"<<endl; return -1;}
-    cout<<"Camera opened..."<<endl;
-    
-    while(1)
-    {
+	if (pid != 0 )
+	{
+		close(descripteur[0]);*/
+		setupPins();	
+		int nCount=0;
+		time_t timer_begin,timer_end;
+		time_t timer_start_interval = 0, timer_end_interval = 0;
+		time_t begin = 0, fin = 0;
+		cv::Mat image;
+		raspicam::RaspiCam_Cv camera;
 		
-#if	DEBUG>0
+		//set camera params
+		camera.set( CV_CAP_PROP_FORMAT, CV_8UC3 ); // CV_8UC3 = frame RGB; CV_8UC1 = frame gray;
+		camera.set( CV_CAP_PROP_FRAME_WIDTH, 640 );
+		camera.set( CV_CAP_PROP_FRAME_HEIGHT, 480 );
+		//camera.set(CV_CAP_PROP_FPS, 90);
+		
+
+		if (!camera.open()) {cerr<<"Error opening the camera"<<endl; return -1;}
+		cout<<"Camera opened..."<<endl;
 		
 		time ( &timer_begin ); // Lance le chrono
-		cout<<"Capturing "<<nCount<<" frames ...."<<endl;
-		
-		for ( int i=0; i<nCount; i++ ) 
-		{	
-#endif
+		while(1)
+		{
 			//Start capture
 			camera.grab();
 			camera.retrieve (image);
 			
-#if	DEBUG>0
+			cv::imshow("frame", image);
+			cv::waitKey(50);
 		
-			if ( i%5==0 )  cout<<"\r captured "<<i<<" images"<<std::flush;
-#endif
-        
 			// Image preprocessing : get the preprocessed image (in hsv)
 			cv::Mat hsv = preprocessing(image);
 		
@@ -105,11 +98,11 @@ int main ( int argc,char **argv )
 			cv::Mat redMask = SetRedMask(hsv);
 			
 
-#if	DEBUG>1
+	#if	DEBUG>1
 			cv::imshow("redmask", redMask);
 			cv::imshow("bluemask", blueMask);
 			cv::waitKey(50);
-#endif
+	#endif
 			// find contours in the thresholded image and initialize the shape detector
 			std::vector<std::vector<cv::Point> > contoursB;
 			findContours(blueMask.clone(), contoursB, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
@@ -121,33 +114,19 @@ int main ( int argc,char **argv )
 			RecognizedShape shapeB = shapeDetectorBlue(image, contoursB);
 			RecognizedShape shapeR = shapeDetectorRed(image, contoursR);
 			
-			
-#if	DEBUG>1
-			/*if(shapeB.matrix.size().width >10 && shapeB.matrix.size().height>10)
+			// save global image every 10 seconds	
+			if (canSave(begin, fin, INTERVAL_GLOBAL))	
 			{
-				cv::imshow("blueCrop", shapeB.matrix);
-				cv::waitKey(50);
-			}*/
-#endif	
-			
-			// blink led if shape founded
-#if	DEBUG>0	
-			cv::imshow("frame", image);
-			cv::waitKey(50);
-			//digitalWrite (0, HIGH) ;
-			//digitalWrite (0,  LOW) ; 
-#endif
-			// save global image every 3 seconds
-			
 				stringstream filename_global;
 				filename_global<<filepathGlobal<<(countGlobal)<<fileFormat;
 				imwrite(filename_global.str(),image);
 				cout<<"Global image saved at "<<filename_global.str()<<endl;
 				countGlobal ++;
-				sleep(10);
-			//save image
+				time(&begin);
+			}
 			
-			if(canSave(timer_start_interval, timer_end_interval))
+			//save image
+			if(canSave(timer_start_interval, timer_end_interval, INTERVAL_SHAPE))
 			{	
 				//Try to save
 				bool saveR = save_image(shapeR,"RED");
@@ -155,13 +134,16 @@ int main ( int argc,char **argv )
 				
 				if(saveR)
 				{
-						buffer[0] = LIGHT_RED;
-						write(descripteur[1],buffer, sizeof(int));
+					digitalWrite (3, HIGH) ;
+					delay(500);
+					digitalWrite (3,  LOW) ; 
+						
 				}
 				if(saveB)
 				{
-						buffer[0] = LIGHT_BLUE;
-						write(descripteur[1],buffer, sizeof(int));
+					digitalWrite (2, HIGH) ;
+					delay(500);
+					digitalWrite (2,  LOW) ; 
 				}
 				
 				if(saveR || saveB)
@@ -173,32 +155,34 @@ int main ( int argc,char **argv )
 				saveR = false;
 				
 			}
-#if	DEBUG>0
+			
+			//if canSave()
+	#if	DEBUG>0
+			
+			//show time statistics
+			getFPS(timer_begin, timer_end, nCount);
+
+			// cout<< "\n Appuyez sur 'Entrée' pour terminer" <<endl;
+			//getchar();
+	#endif
 		}
 		
-		//show time statistics
-		time ( &timer_end ); // Arrete le chrono
-		double secondsElapsed = difftime ( timer_end,timer_begin );
-		cout<< "\n" << secondsElapsed  <<" seconds for "<< nCount<<"  frames : FPS = "<<  ( float ) (nCount/secondsElapsed) << endl;
-
-		// cout<< "\n Appuyez sur 'Entrée' pour terminer" <<endl;
-		//getchar();
-#endif
-	}
-	
-	camera.release(); // Close the PiCam device
-	cout<< "\n Release done" << endl;
-	
+		camera.release(); // Close the PiCam device
+		cout<< "\n Release done" << endl;
+		
 		return 0;
 	}
-	else{
+
+	/*else{
 		while(1){
 			close(descripteur[1]);
 			read(descripteur[0], buffer, TAILLE_BUFFER);
 			test_Flags (buffer);
 		}
-	}
-}
+	}*/
+
+
+/****** Functions *******/
 
 bool save_image(RecognizedShape shape, string color)
 {
@@ -262,12 +246,37 @@ bool save_image(RecognizedShape shape, string color)
 	return false;
 }
 
-bool canSave(time_t &start, time_t &end)
+bool canSave(time_t &start, time_t &end, int interval)
 {
 	if(start == 0)
 		return true;
 	time ( &end );
 	double secondsElapsed = difftime (end, start);
-	return secondsElapsed>=3;
+	return secondsElapsed>=interval;
 	
 }
+
+float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount)
+{
+	if(nCount < 100)
+	{
+		nCount++;
+		return -1;
+	}
+	
+	time ( &timer_end ); // Arrete le chrono
+	double secondsElapsed = difftime ( timer_end,timer_begin );
+	float fps = ( float ) (nCount/secondsElapsed);
+	nCount = 0;
+	cout<< "\nFPS = "<<  fps << endl;
+	time ( &timer_begin );
+	return fps;
+}
+
+void setupPins()
+{
+	pinMode(13, OUTPUT);
+	pinMode(15, OUTPUT);
+	pinMode(16, OUTPUT);
+}
+

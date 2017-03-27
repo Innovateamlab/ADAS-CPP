@@ -16,7 +16,7 @@
 #include <wiringPi.h>
 
 
-#define DEBUG	0
+#define DEBUG	1
 #define LIGHT_BLUE 2
 #define LIGHT_RED 3
 #define FAIL 4
