@@ -35,6 +35,10 @@ void setupPins();
 
 int main ( int argc,char **argv ) 
 {
+	countRed = atoi(argv[1]);
+	countBlue = atoi(argv[2]);
+	countGlobal = atoi(argv[3]);
+
 
 	/*int descripteur[2];
 	// descripteur[0] = sortie du tube
@@ -117,11 +121,11 @@ int main ( int argc,char **argv )
 			// save global image every 10 seconds	
 			if (canSave(begin, fin, INTERVAL_GLOBAL))	
 			{
+				countGlobal ++;
 				stringstream filename_global;
 				filename_global<<filepathGlobal<<(countGlobal)<<fileFormat;
 				imwrite(filename_global.str(),image);
 				cout<<"Global image saved at "<<filename_global.str()<<endl;
-				countGlobal ++;
 				time(&begin);
 			}
 			
