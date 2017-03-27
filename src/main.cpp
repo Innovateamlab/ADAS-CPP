@@ -72,8 +72,8 @@ int main ( int argc,char **argv )
 		
 		//set camera params
 		camera.set( CV_CAP_PROP_FORMAT, CV_8UC3 ); // CV_8UC3 = frame RGB; CV_8UC1 = frame gray;
-		camera.set( CV_CAP_PROP_FRAME_WIDTH,  1720);
-		camera.set( CV_CAP_PROP_FRAME_HEIGHT, 1080);
+		camera.set( CV_CAP_PROP_FRAME_WIDTH,  1024);
+		camera.set( CV_CAP_PROP_FRAME_HEIGHT, 768);
 		//camera.set(CV_CAP_PROP_FPS, 90);
 		
 
