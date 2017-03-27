@@ -137,6 +137,7 @@ int main ( int argc,char **argv )
 					digitalWrite (3, HIGH) ;
 					delay(500);
 					digitalWrite (3,  LOW) ; 
+					delay(500);
 						
 				}
 				if(saveB)
@@ -144,6 +145,7 @@ int main ( int argc,char **argv )
 					digitalWrite (2, HIGH) ;
 					delay(500);
 					digitalWrite (2,  LOW) ; 
+					delay(500);
 				}
 				
 				if(saveR || saveB)
