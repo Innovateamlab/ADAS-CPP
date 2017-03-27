@@ -23,7 +23,7 @@ using namespace cv;
 string filepathRed = "ImagesSave/Red/imgCropRed_", filepathBlue = "ImagesSave/Blue/imgCropBlue_";
 string filepathGlobal = "ImagesSave/Global/imgGlobal_";
 string fileFormat = ".jpg";
-int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 10;
+int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 3;
 
 int countRed = 0, countBlue = 0;
 int countGlobal = 0;
@@ -31,7 +31,7 @@ int countGlobal = 0;
 bool save_image(RecognizedShape shape, string color);
 bool canSave(time_t &start, time_t &end, int interval);
 float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount);
-void setupPins();
+
 
 int main ( int argc,char **argv ) 
 {
@@ -66,7 +66,9 @@ int main ( int argc,char **argv )
 	if (pid != 0 )
 	{
 		close(descripteur[0]);*/
-		setupPins();	
+		
+		gpioSetup(); 
+		
 		int nCount=0;
 		time_t timer_begin,timer_end;
 		time_t timer_start_interval = 0, timer_end_interval = 0;
@@ -279,10 +281,13 @@ float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount)
 	return fps;
 }
 
-void setupPins()
+void gpioSetup() //GPIO pins initialisation
 {
-	pinMode(3, OUTPUT);
-	pinMode(2, OUTPUT);
-	pinMode(16, OUTPUT);
-}
+		wiringPiSetup();	
+		pinMode(LIGHT_BLUE, OUTPUT);
+		pinMode(LIGHT_RED, OUTPUT);
+		pinMode(FAIL, OUTPUT);
+	}
+
+
 

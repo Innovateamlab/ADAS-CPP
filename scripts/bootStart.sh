@@ -3,10 +3,10 @@
 echo shell begin
 sleep 40
 echo config GPIO pins
-sudo /usr/local/bin/gpio export 15 out
-sudo /usr/local/bin/gpio export 16 out
-sudo /usr/local/bin/gpio export 17 out
-sudo /usr/local/bin/gpio export 18 out
+sudo /usr/local/bin/gpio export 2 out
+sudo /usr/local/bin/gpio export 3 out
+sudo /usr/local/bin/gpio export 4 out
+
 echo launch program...
 cd /home/pi/Documents/ADAS-CPP
 
