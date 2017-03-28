@@ -9,12 +9,10 @@ using namespace cv;
 #define	BLUE	1
 
 
-RecognizedShape shapeDetectorBlue(cv::Mat source, std::vector<std::vector<cv::Point> > contours) 
+std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::vector<cv::Point> > contours) 
 {
 	//set led blink param
 	//wiringPiSetup () ;
-	
-	
 	
 	// Find shape
 	cv::Mat img_cropped;
@@ -23,8 +21,11 @@ RecognizedShape shapeDetectorBlue(cv::Mat source, std::vector<std::vector<cv::Po
 	int thickness = 2;
 	cv::Mat imgC;
 	
+	std::vector<RecognizedShape> recognizedShapes;
 	RecognizedShape recognizedShape;
-	recognizedShape.label = "UNKNOWN";
+	
+	/*RecognizedShape recognizedShape;
+	recognizedShape.label = "UNKNOWN";*/
 	
 	for (int i = 0; i < contours.size(); i++)
 	{
@@ -63,7 +64,7 @@ RecognizedShape shapeDetectorBlue(cv::Mat source, std::vector<std::vector<cv::Po
 			/// SQUARE
 			if (vtc == 4 && mincos >= -0.1 && maxcos <= 0.3)
 			{
-				setLabel(dst, "BLUE RECT", contours[i]);
+				setLabel(dst, "BLUE RECT", cv::boundingRect(contours[i]));
 				cv::Rect r = cv::boundingRect(approx);
 				cv::Point pt(r.x, r.y);
 				
@@ -183,13 +184,14 @@ RecognizedShape shapeDetectorBlue(cv::Mat source, std::vector<std::vector<cv::Po
 				
 				recognizedShape.matrix = imgC;
 				recognizedShape.label = "BLUE_RECT";
-				return recognizedShape;
+				recognizedShape.boundingRect = r;
 				
+				recognizedShapes.push_back(recognizedShape);
 			}	
 			//else if (vtc == 5 && mincos >= -0.34 && maxcos <= -0.27)
-				//setLabel(dst, "PENTA", contours[i]);
+				//setLabel(dst, "PENTA", cv::boundingRect(contours[i]));
 			//else if (vtc == 6 && mincos >= -0.55 && maxcos <= -0.45)
-				//setLabel(dst, "HEXA", contours[i]);
+				//setLabel(dst, "HEXA", cv::boundingRect(contours[i]));
 		}
 		else
 		{	/// CIRCLE
@@ -206,7 +208,7 @@ RecognizedShape shapeDetectorBlue(cv::Mat source, std::vector<std::vector<cv::Po
 			//digitalWrite (1, HIGH) ; delay (200) ;
 			//digitalWrite (1,  LOW) ; delay (500) ;
 			
-				setLabel(dst, "BLUE CIR", contours[i]);
+				setLabel(dst, "BLUE CIR", cv::boundingRect(contours[i]));
 				cv::Rect r = cv::boundingRect(approx);
 				cv::Point pt(r.x, r.y);
 				// Set h and w in the same size, in the size of the highest
@@ -223,18 +225,19 @@ RecognizedShape shapeDetectorBlue(cv::Mat source, std::vector<std::vector<cv::Po
 				
 				recognizedShape.matrix = imgC;
 				recognizedShape.label = "BLUE_CIRC";
-				return recognizedShape;			
+				recognizedShape.boundingRect = r;
+				
+				recognizedShapes.push_back(recognizedShape);
 			}
 		}
 	}
 	/*cv::imshow("dst_blue", dst);
 	cv::waitKey(30);*/
-	
-	recognizedShape.matrix = dst;	
-	return recognizedShape;
+		
+	return recognizedShapes;
 }
 
-RecognizedShape shapeDetectorRed(cv::Mat source, std::vector<std::vector<cv::Point> > contours) 
+std::vector<RecognizedShape> shapeDetectorRed(cv::Mat source, std::vector<std::vector<cv::Point> > contours) 
 {
 	//set led blink param
 	wiringPiSetup () ;
@@ -247,8 +250,11 @@ RecognizedShape shapeDetectorRed(cv::Mat source, std::vector<std::vector<cv::Poi
 	int thickness = 2;
 	cv::Mat imgC;
 	
+	std::vector<RecognizedShape> recognizedShapes;
 	RecognizedShape recognizedShape;
-	recognizedShape.label = "UNKNOWN";
+	
+	/*RecognizedShape recognizedShape;
+	recognizedShape.label = "UNKNOWN";*/
 	
 	for (int i = 0; i < contours.size(); i++)
 	{
@@ -280,8 +286,8 @@ RecognizedShape shapeDetectorRed(cv::Mat source, std::vector<std::vector<cv::Poi
 			// Display the rectangle = square
 			//cv::rectangle(dst,pt,pt+cv::Point(s.width,s.height),CV_RGB(255,0,255),thickness);
 			
-#if DEBUG>1
-			setLabel(source, "RED TRI", contours[i]);    // Triangles
+#if DEBUG>=2
+			setLabel(source, "RED TRI", cv::boundingRect(contours[i]));    // Triangles
 			cv::rectangle(source,pt,pt+cv::Point(s.width,s.height),CV_RGB(255,0,255),thickness);
 #endif
 			cv::Mat img_cropped = source(r);
@@ -349,7 +355,9 @@ RecognizedShape shapeDetectorRed(cv::Mat source, std::vector<std::vector<cv::Poi
 			
 			recognizedShape.matrix = imgC;
 			recognizedShape.label = "RED_TRI";
-			return recognizedShape;
+			recognizedShape.boundingRect = r;
+			
+			recognizedShapes.push_back(recognizedShape);
 			
 			
 			/*cv::Mat dst2 = dst.clone();	
@@ -389,7 +397,7 @@ RecognizedShape shapeDetectorRed(cv::Mat source, std::vector<std::vector<cv::Poi
 				//digitalWrite (0, HIGH) ; delay (200) ;
 				//digitalWrite (0,  LOW) ; delay (500) ;
 					
-				//setLabel(dst, "RED CIR", contours[i]);
+				//setLabel(dst, "RED CIR", cv::boundingRect(contours[i]));
 				cv::Rect r = cv::boundingRect(approx);
 				cv::Point pt(r.x, r.y);
 				
@@ -399,8 +407,8 @@ RecognizedShape shapeDetectorRed(cv::Mat source, std::vector<std::vector<cv::Poi
 				// Display the rectangle = square
 				//cv::rectangle(dst,pt,pt+cv::Point(s.width,s.height),CV_RGB(255,0,255),thickness);
 				
-#if DEBUG>1
-				setLabel(source, "RED CIRC", contours[i]);  
+#if DEBUG>=2
+				setLabel(source, "RED CIRC", cv::boundingRect(contours[i]));  
 				cv::rectangle(source,pt,pt+cv::Point(s.width,s.height),CV_RGB(255,0,255),thickness);
 #endif
 				
@@ -414,13 +422,14 @@ RecognizedShape shapeDetectorRed(cv::Mat source, std::vector<std::vector<cv::Poi
 				
 				recognizedShape.matrix = imgC;
 				recognizedShape.label = "RED_CIRC";
-				return recognizedShape;	
+				recognizedShape.boundingRect = r;
+				
+				recognizedShapes.push_back(recognizedShape);
 			}
 		}
 	}
 	//cv::imshow("dst_red", dst);
 	//cv::waitKey(30);
 	
-	recognizedShape.matrix = dst;
-	return recognizedShape;
+	return recognizedShapes;
 }
