@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #define TAILLE_BUFFER 2*sizeof(int)
 
@@ -15,6 +16,7 @@ int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 10;
 
 int countRed = 0, countBlue = 0;
 int countGlobal = 0;
+bool usePipe = true;
 
 bool save_image(RecognizedShape shape, string color);
 bool canSave(time_t &start, time_t &end, int interval);
@@ -24,7 +26,7 @@ int setupNamedPipe();
 
 int main ( int argc, char **argv ) 
 {
-	if(argc ==  3)
+	if(argc ==  4)
 	{
 		countRed = atoi(argv[1]);
 		countBlue = atoi(argv[2]);
@@ -97,7 +99,18 @@ int main ( int argc, char **argv )
 			imwrite(filename_global.str(),image);
 			cout<<"Global image saved at "<<filename_global.str()<<endl;
 			time(&begin);
-			write(pipeDescriptor,"5", sizeof("5"));
+			if(usePipe)
+			{
+				int err = write(pipeDescriptor,"5", sizeof("5"));
+				if(err == -1)
+				{
+					char buffer[256];
+					char * message = strerror_r(errno, buffer, 256);
+					cout << "(Write ./ShapeColorDectector.a) " << errno << " : " << message << endl;
+					usePipe = false;
+				}
+			}
+			
 		}
 		
 		//save image
@@ -250,11 +263,17 @@ void setupPins()
 int setupNamedPipe()
 {
 	int fd;
-	char * fifo_adas = "/tmp/fifo_adas";
+	char * fifo_adas = "./fifo_adas";
 	
 	mkfifo(fifo_adas, 0666);
 	
 	fd = open(fifo_adas, O_WRONLY);
+	if(fd != 0)
+	{
+		char buffer[256];
+		char * message = strerror_r(errno, buffer, 256);
+		cout << "(Open ./ShapeColorDectector.a) " << errno << " : " << message << endl;
+	}
 	
 	return fd;
 }

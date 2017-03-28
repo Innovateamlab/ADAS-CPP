@@ -2,6 +2,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <string.h>
+#include <errno.h>
 
 using namespace std;
 
@@ -18,10 +20,31 @@ int main(void)
 	while(1)
 	{
 	
+		int err = read(pipeDescriptor, buffer, MAX_BUFFER);
+		if(err == -1)
+		{
+			char buffer[256];
+			char * message = strerror_r(errno, buffer, 256);
+			cout << "(Read ./Flags.a) " << errno << " : " << message << endl;
+		}
+		else
+		{
+			cout << "Received " << buffer << endl;
+		}
+	}
+	
+	
+	/*
+	while(1)
+	{
 		read(pipeDescriptor, buffer, MAX_BUFFER);
 		cout << "Received " << buffer << endl;
+	}*/
 	
-	}
+	
+	
+	
+	
 	/*int color_flag = buffer[0];
 	int fail_flag = buffer[4];
 	
@@ -56,9 +79,15 @@ int main(void)
 int setupNamedPipe()
 {
 	int fd;
-	char * fifo_adas = "/tmp/fifo_adas";
+	char * fifo_adas = "./fifo_adas";
 	
 	fd = open(fifo_adas, O_RDONLY);
+	if(fd == -1)
+	{
+		char buffer[256];
+		char * message = strerror_r(errno, buffer, 256);
+		cout << "(Open ./Flags.a) " << errno << " : " << message << endl;
+	}
 	
 	return fd;
 }
