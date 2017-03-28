@@ -1,8 +1,5 @@
 #include "header.hpp"
-#include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
+#include "Flags.hpp"
 
 #define TAILLE_BUFFER 2*sizeof(int)
 
@@ -17,12 +14,14 @@ int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 10;
 int countRed = 0, countBlue = 0;
 int countGlobal = 0;
 bool usePipe = true;
+bool doSave = true;
 
-bool save_image(RecognizedShape shape, string color);
+bool save_image(cv::Mat frame, RecognizedShape shape, string color);
 bool canSave(time_t &start, time_t &end, int interval);
 float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount);
 void setupPins();
 int setupNamedPipe();
+void displayRecognizedShapes(cv::Mat &frame, std::vector<RecognizedShape> &shapes);
 
 int main ( int argc, char **argv ) 
 {
@@ -33,8 +32,13 @@ int main ( int argc, char **argv )
 		countGlobal = atoi(argv[3]);
 	}
 	
+	if(argv[1] == "noSave")
+	{
+		doSave = false;
+	}
+	
 	setupPins();	
-	int pipeDescriptor = setupNamedPipe();
+	int pipeDescriptor = setupNamedPipe(O_WRONLY);
 	
 	int nCount=0;
 	time_t timer_begin,timer_end;
@@ -61,35 +65,6 @@ int main ( int argc, char **argv )
 		camera.grab();
 		camera.retrieve (image);
 		
-#if	DEBUG>1
-		cv::imshow("frame", image);
-		cv::waitKey(50);
-#endif
-
-		// Image preprocessing : get the preprocessed image (in hsv)
-		cv::Mat hsv = preprocessing(image);
-	
-		// Défine range of red and blue color in HSV
-		cv::Mat blueMask = SetBlueMask(hsv);
-		cv::Mat redMask = SetRedMask(hsv);
-		
-
-#if	DEBUG>1
-		cv::imshow("redmask", redMask);
-		cv::imshow("bluemask", blueMask);
-		cv::waitKey(50);
-#endif
-		// find contours in the thresholded image and initialize the shape detector
-		std::vector<std::vector<cv::Point> > contoursB;
-		findContours(blueMask.clone(), contoursB, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-		
-		std::vector<std::vector<cv::Point> > contoursR;
-		findContours(redMask.clone(), contoursR, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-		
-		// find shape
-		RecognizedShape shapeB = shapeDetectorBlue(image, contoursB);
-		RecognizedShape shapeR = shapeDetectorRed(image, contoursR);
-		
 		// save global image every 10 seconds	
 		if (canSave(begin, fin, INTERVAL_GLOBAL))	
 		{
@@ -110,17 +85,52 @@ int main ( int argc, char **argv )
 					usePipe = false;
 				}
 			}
-			
 		}
+
+		// Image preprocessing : get the preprocessed image (in hsv)
+		cv::Mat hsv = preprocessing(image);
+	
+		// Défine range of red and blue color in HSV
+		cv::Mat blueMask = SetBlueMask(hsv);
+		cv::Mat redMask = SetRedMask(hsv);
 		
+
+#if	DEBUG>=2
+		cv::imshow("redmask", redMask);
+		cv::imshow("bluemask", blueMask);
+		cv::waitKey(50);
+#endif
+		// find contours in the thresholded image and initialize the shape detector
+		std::vector<std::vector<cv::Point> > contoursB;
+		findContours(blueMask.clone(), contoursB, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		
+		std::vector<std::vector<cv::Point> > contoursR;
+		findContours(redMask.clone(), contoursR, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		
+		// find shape
+		std::vector<RecognizedShape> shapeB = shapeDetectorBlue(image, contoursB);
+		std::vector<RecognizedShape> shapeR = shapeDetectorRed(image, contoursR);
+		
+#if	DEBUG>=1
+		displayRecognizedShapes(image, shapeB);
+		displayRecognizedShapes(image, shapeR);
+		cv::imshow("frame", image);
+		cv::waitKey(50);
+#endif
+
 		//save image
-		if(canSave(timer_start_interval, timer_end_interval, INTERVAL_SHAPE))
+		if(doSave && canSave(timer_start_interval, timer_end_interval, INTERVAL_SHAPE))
 		{	
-			//Try to save
-			bool saveR = save_image(shapeR,"RED");
-			bool saveB = save_image(shapeB,"BLUE");
+			bool saveR = false;
+			bool saveB = false;
 			
-			if(saveR)
+			//Try to save
+			if(shapeR.size() != 0)
+				saveR = save_image(image, shapeR[0],"RED");
+			if(shapeB.size() != 0)
+				saveB = save_image(image, shapeB[0],"BLUE");
+			
+			if(saveR && usePipe)
 			{
 				write(pipeDescriptor,"0", sizeof("0"));
 				/*
@@ -129,7 +139,7 @@ int main ( int argc, char **argv )
 				digitalWrite (LIGHT_RED,  LOW) ; 
 				delay(500);		*/
 			}
-			if(saveB)
+			if(saveB&& usePipe)
 			{
 				write(pipeDescriptor,"1", sizeof("1"));
 				/*digitalWrite (LIGHT_BLUE, HIGH) ;
@@ -142,14 +152,9 @@ int main ( int argc, char **argv )
 			{
 				time ( &timer_start_interval );
 			}
-			
-			saveB = false;
-			saveR = false;
-			
 		}
 		
-		//if canSave()
-#if	DEBUG>0
+#if	DEBUG>=1
 		//show time statistics
 		getFPS(timer_begin, timer_end, nCount);
 #endif
@@ -164,7 +169,7 @@ int main ( int argc, char **argv )
 
 /****** Functions *******/
 
-bool save_image(RecognizedShape shape, string color)
+bool save_image(cv::Mat frame, RecognizedShape shape, string color)
 {
 	stringstream filename;
 	
@@ -177,14 +182,14 @@ bool save_image(RecognizedShape shape, string color)
 			if(shape.label == "BLUE_RECT")
 			{
 				filename<<filepathBlue<<(countBlue)<<"_RECT"<<fileFormat;
-				imwrite(filename.str(),shape.matrix);
+				imwrite(filename.str(),frame);
 				cout<<"Blue image saved at "<<filename.str()<<endl;
 				return true;
 			}
 			else if(shape.label == "BLUE_CIRC")
 			{
 				filename<<filepathBlue<<(countBlue)<<"_CIRC"<<fileFormat;
-				imwrite(filename.str(),shape.matrix);
+				imwrite(filename.str(),frame);
 				cout<<"Blue image saved at "<<filename.str()<<endl;
 				return true;
 			}
@@ -204,14 +209,14 @@ bool save_image(RecognizedShape shape, string color)
 			if(shape.label == "RED_TRI")
 			{
 				filename<<filepathRed<<(countRed)<<"_TRI"<<fileFormat;
-				imwrite(filename.str(),shape.matrix);
+				imwrite(filename.str(),frame);
 				cout<<"Red image saved at "<<filename.str()<<endl;
 				return true;
 			}
 			else if(shape.label == "RED_CIRC")
 			{
 				filename<<filepathRed<<(countRed)<<"_CIRC"<<fileFormat;
-				imwrite(filename.str(),shape.matrix);
+				imwrite(filename.str(),frame);
 				cout<<"Red image saved at "<<filename.str()<<endl;
 				return true;
 			}
@@ -260,21 +265,11 @@ void setupPins()
 	pinMode(16, OUTPUT);
 }
 
-int setupNamedPipe()
+void displayRecognizedShapes(cv::Mat &frame, std::vector<RecognizedShape> &shapes)
 {
-	int fd;
-	char * fifo_adas = "./fifo_adas";
-	
-	mkfifo(fifo_adas, 0666);
-	
-	fd = open(fifo_adas, O_WRONLY);
-	if(fd != 0)
+	for(int i=0; i<shapes.size(); i++)
 	{
-		char buffer[256];
-		char * message = strerror_r(errno, buffer, 256);
-		cout << "(Open ./ShapeColorDectector.a) " << errno << " : " << message << endl;
-	}
-	
-	return fd;
+		displayShape(frame, shapes[i]);
+	}		
 }
 

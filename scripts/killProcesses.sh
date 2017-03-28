@@ -1,2 +1,4 @@
-#pkill -f *./ShapeColorDectector*
-#pkill -f *./FlagsInterface*
+#! /bin/sh
+
+sudo pkill -f ShapeColorDectector
+sudo pkill -f FlagInterface

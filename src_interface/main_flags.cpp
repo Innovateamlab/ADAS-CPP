@@ -1,9 +1,6 @@
 #include <iostream>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <errno.h>
+
+#include "Flags.hpp"
 
 using namespace std;
 
@@ -12,20 +9,19 @@ using namespace std;
 int setupNamedPipe();
 
 int main(void) 
-{
-	int pipeDescriptor = setupNamedPipe();
+{	
+	int pipeDescriptor = setupNamedPipe(O_RDONLY);
 	char buffer[MAX_BUFFER];
 	
 	
-	while(1)
+	for(int i=0;i<5;i++)
 	{
-	
 		int err = read(pipeDescriptor, buffer, MAX_BUFFER);
 		if(err == -1)
 		{
-			char buffer[256];
-			char * message = strerror_r(errno, buffer, 256);
+			char * message = strerror_r(errno, buffer, MAX_BUFFER);
 			cout << "(Read ./Flags.a) " << errno << " : " << message << endl;
+			return -1;
 		}
 		else
 		{
@@ -40,10 +36,6 @@ int main(void)
 		read(pipeDescriptor, buffer, MAX_BUFFER);
 		cout << "Received " << buffer << endl;
 	}*/
-	
-	
-	
-	
 	
 	/*int color_flag = buffer[0];
 	int fail_flag = buffer[4];
@@ -74,20 +66,6 @@ int main(void)
 			digitalWrite (FAIL,  LOW) ; delay (500) ;
 		}
 	}*/
-}
-
-int setupNamedPipe()
-{
-	int fd;
-	char * fifo_adas = "./fifo_adas";
 	
-	fd = open(fifo_adas, O_RDONLY);
-	if(fd == -1)
-	{
-		char buffer[256];
-		char * message = strerror_r(errno, buffer, 256);
-		cout << "(Open ./Flags.a) " << errno << " : " << message << endl;
-	}
-	
-	return fd;
+	unlink(PIPE_FILENAME);
 }

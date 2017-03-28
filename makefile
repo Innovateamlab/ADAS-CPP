@@ -5,7 +5,7 @@ OBJS=$(SRCS:.cpp=.o)
 
 DEPS = include/
 LIBS = -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_objdetect -lrt -lwiringPi -lraspicam -lraspicam_cv -lopencv_imgcodecs
-CFLAGS = -Wall
+CFLAGS = -Wall -g
 
 CC = g++
 

@@ -66,7 +66,7 @@ unsigned char MatToUChar(cv::Mat image)
 }
 
 
-void setLabel(cv::Mat& im, const std::string label, std::vector<cv::Point>& contour)
+void setLabel(cv::Mat& im, const std::string label, cv::Rect boundingRect)
 {
 	int fontface = cv::FONT_HERSHEY_SIMPLEX;
 	double scale = 0.4;
@@ -74,11 +74,19 @@ void setLabel(cv::Mat& im, const std::string label, std::vector<cv::Point>& cont
 	int baseline = 0;
 
 	cv::Size text = cv::getTextSize(label, fontface, scale, thickness, &baseline);
-	cv::Rect r = cv::boundingRect(contour);
+	cv::Rect r = boundingRect;
 
 	cv::Point pt(r.x + ((r.width - text.width) / 2), r.y + ((r.height + text.height) / 2));
 	cv::rectangle(im, pt + cv::Point(0, baseline), pt + cv::Point(text.width, -text.height), CV_RGB(255,255,255), CV_FILLED);
 	cv::putText(im, label, pt, fontface, scale, CV_RGB(0,0,0), thickness, 8);
+}
+
+void displayShape(cv::Mat &frame, RecognizedShape &shape)
+{
+	cv::Point pt(shape.boundingRect.x, shape.boundingRect.y);
+	cv::rectangle(frame,pt,pt+cv::Point(shape.boundingRect.width,shape.boundingRect.height),CV_RGB(255,0,255),2);
+	
+	setLabel(frame, shape.label ,shape.boundingRect);
 }
 
 
