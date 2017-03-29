@@ -9,7 +9,7 @@ using namespace cv;
 string filepathRed = "ImagesSave/Red/imgCropRed_", filepathBlue = "ImagesSave/Blue/imgCropBlue_";
 string filepathGlobal = "ImagesSave/Global/imgGlobal_";
 string fileFormat = ".jpg";
-int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 3;
+int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 5;
 
 int countRed = 0, countBlue = 0;
 int countGlobal = 0;
@@ -102,9 +102,10 @@ int main ( int argc, char **argv )
 		std::vector<RecognizedShape> shapeB = shapeDetectorBlue(image, contoursB);
 		std::vector<RecognizedShape> shapeR = shapeDetectorRed(image, contoursR);
 		
-#if	DEBUG>=1
 		displayRecognizedShapes(image, shapeB);
 		displayRecognizedShapes(image, shapeR);
+		
+#if	DEBUG>=1
 		cv::imshow("frame", image);
 		cv::waitKey(50);
 #endif
