@@ -7,6 +7,7 @@
 #include <string.h>
 #include <errno.h>
 #include <iostream>
+#include <cstdio>
 
 //CONSTANTS
 int LIGHT_BLUE = 2;
@@ -45,6 +46,33 @@ int setupNamedPipe(int rights)
 	
 	return fd;
 }
+
+void runningThread(int pipeDescriptor)
+{
+	pid_t pid = fork();
+	
+	if(pid == 0)
+	{
+		//Child
+		while(1)
+		{
+			Data data;
+			data.flag = RUNNING;
+			std::sprintf (data.message, "Running Thread");
+			int err = write(pipeDescriptor,&data, sizeof(Data));
+			if(err == -1)
+			{
+				char buffer[256];
+				char * message = strerror_r(errno, buffer, 256);
+				std::cout << "(Running Thread) " << errno << " : " << message << std::endl;
+				break;
+			}
+			
+			sleep(2);
+		}
+	}
+}
+
 
 
 
