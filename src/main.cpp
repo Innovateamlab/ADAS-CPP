@@ -17,13 +17,6 @@ bool usePipe = true;
 bool doSave = true;
 Data data;
 
-bool save_image(cv::Mat frame, RecognizedShape shape, string color);
-bool canSave(time_t &start, time_t &end, int interval);
-float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount);
-
-void displayRecognizedShapes(cv::Mat &frame, std::vector<RecognizedShape> &shapes);
-void runningThread(int pipeDescriptor);
-
 int main ( int argc, char **argv ) 
 {
 	if(argc ==  4)
@@ -158,7 +151,7 @@ int main ( int argc, char **argv )
 
 /****** Functions *******/
 
-bool save_image(cv::Mat frame, RecognizedShape shape, string color)
+extern bool save_image(cv::Mat frame, RecognizedShape shape, string color)
 {
 	stringstream filename;
 	

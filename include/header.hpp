@@ -48,4 +48,11 @@ cv::Mat SetBlueMask(cv::Mat hsv);
 cv::Mat SetRedMask(cv::Mat hsv);
 cv::Mat SetCustomMask(cv::Mat hsv, uchar lower[], uchar upper[]);
 
+//main functions
+bool save_image(cv::Mat frame, RecognizedShape shape, std::string color);
+bool canSave(time_t &start, time_t &end, int interval);
+float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount);
+void displayRecognizedShapes(cv::Mat &frame, std::vector<RecognizedShape> &shapes);
+void runningThread(int pipeDescriptor);
+
 #endif
