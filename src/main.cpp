@@ -22,6 +22,7 @@ bool canSave(time_t &start, time_t &end, int interval);
 float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount);
 
 void displayRecognizedShapes(cv::Mat &frame, std::vector<RecognizedShape> &shapes);
+void runningThread(int pipeDescriptor);
 
 int main ( int argc, char **argv ) 
 {
@@ -39,6 +40,7 @@ int main ( int argc, char **argv )
 	
 	
 	int pipeDescriptor = setupNamedPipe(O_WRONLY);
+	runningThread(pipeDescriptor);
 	
 	int nCount=0;
 	time_t timer_begin,timer_end;
@@ -65,7 +67,7 @@ int main ( int argc, char **argv )
 		camera.grab();
 		camera.retrieve (image);
 		
-		// save global image every 10 seconds	
+		//save global
 		if (canSave(begin, fin, INTERVAL_GLOBAL))	
 		{
 			countGlobal ++;
@@ -265,5 +267,31 @@ void displayRecognizedShapes(cv::Mat &frame, std::vector<RecognizedShape> &shape
 	{
 		displayShape(frame, shapes[i]);
 	}		
+}
+
+void runningThread(int pipeDescriptor)
+{
+	pid_t pid = fork();
+	
+	if(pid == 0)
+	{
+		//Child
+		while(1)
+		{
+			Data data;
+			data.flag = RUNNING;
+			sprintf (data.message, "Running Thread");
+			int err = write(pipeDescriptor,&data, sizeof(Data));
+			if(err == -1)
+			{
+				char buffer[256];
+				char * message = strerror_r(errno, buffer, 256);
+				cout << "(Running Thread) " << errno << " : " << message << endl;
+				break;
+			}
+			
+			sleep(1);
+		}
+	}
 }
 
