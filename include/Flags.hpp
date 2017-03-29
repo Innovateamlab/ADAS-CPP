@@ -12,6 +12,7 @@
 int LIGHT_BLUE = 2;
 int LIGHT_RED = 3;
 int FAIL = 4;
+int RUNNING = 5;
 
 char * PIPE_FILENAME = "./fifo_adas";
 
