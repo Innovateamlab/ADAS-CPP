@@ -9,10 +9,21 @@
 #include <iostream>
 
 //CONSTANTS
+int LIGHT_BLUE = 2;
+int LIGHT_RED = 3;
+int FAIL = 4;
+
 char * PIPE_FILENAME = "./fifo_adas";
+
 
 //FLAGS
 
+// 
+typedef struct Data
+{
+	int flag;
+	char message[25];
+}Data;
 
 //FUNCTIONS
 int setupNamedPipe(int rights)

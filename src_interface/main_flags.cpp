@@ -13,10 +13,11 @@ int main(void)
 	int pipeDescriptor = setupNamedPipe(O_RDONLY);
 	char buffer[MAX_BUFFER];
 	
+	Data data;
 	
-	for(int i=0;i<5;i++)
+	while(1)
 	{
-		int err = read(pipeDescriptor, buffer, MAX_BUFFER);
+		int err = read(pipeDescriptor, &data, sizeof(Data));
 		if(err == -1)
 		{
 			char * message = strerror_r(errno, buffer, MAX_BUFFER);
@@ -25,7 +26,7 @@ int main(void)
 		}
 		else
 		{
-			cout << "Received " << buffer << endl;
+			cout << "Received (" << data.flag << ") : "<< data.message << endl;
 		}
 	}
 	

@@ -75,7 +75,10 @@ int main ( int argc, char **argv )
 			time(&begin);
 			if(usePipe)
 			{
-				int err = write(pipeDescriptor,"5", sizeof("5"));
+				Data data;
+				data.flag = FAIL;
+				sprintf (data.message, "Save_global");
+				int err = write(pipeDescriptor,&data, sizeof(Data));
 				if(err == -1)
 				{
 					char buffer[256];
