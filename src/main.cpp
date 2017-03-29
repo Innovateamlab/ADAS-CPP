@@ -76,19 +76,6 @@ int main ( int argc, char **argv )
 			imwrite(filename_global.str(),image);
 			cout<<"Global image saved at "<<filename_global.str()<<endl;
 			time(&begin);
-			if(usePipe)
-			{
-				
-				sprintf (data.message, "Save_global");
-				int err = write(pipeDescriptor,&data, sizeof(Data));
-				if(err == -1)
-				{
-					char buffer[256];
-					char * message = strerror_r(errno, buffer, 256);
-					cout << "(Write ./ShapeColorDectector.a) " << errno << " : " << message << endl;
-					usePipe = false;
-				}
-			}
 		}
 
 		// Image preprocessing : get the preprocessed image (in hsv)

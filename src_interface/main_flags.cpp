@@ -25,18 +25,13 @@ int main(void)
 		}
 		else
 		{
-			if (data.flag == LIGHT_BLUE){
-				digitalWrite (LIGHT_BLUE, HIGH) ;
-				delay(500);
-				digitalWrite (LIGHT_BLUE,  LOW) ; 
-				delay(500);
-			}
-			else if (data.flag == LIGHT_RED){
-				digitalWrite (LIGHT_RED, HIGH) ;
-				delay(500);
-				digitalWrite (LIGHT_RED,  LOW) ; 
-				delay(500);
-			}
+
+			digitalWrite (data.flag, HIGH) ;
+			delay(500);
+			digitalWrite (data.flag,  LOW) ; 
+			delay(500);
+			
+			
 			cout << "Received (" << data.flag << ") : "<< data.message << endl;
 		}
 	}
@@ -87,6 +82,6 @@ void gpioSetup() //GPIO pins initialisation
 	wiringPiSetup();	
 	pinMode(LIGHT_BLUE, OUTPUT);
 	pinMode(LIGHT_RED, OUTPUT);
-	pinMode(FAIL, OUTPUT);
+	pinMode(RUNNING, OUTPUT);
 }
 
