@@ -14,9 +14,12 @@
 #include <stdio.h>
 #include </usr/local/include/opencv2/opencv.hpp>
 
-
-
 #define DEBUG 0
+
+extern std::string filepathGlobal;
+extern std::string filepathRed;
+extern std::string filepathBlue;
+extern std::string fileFormat;
 
 typedef struct RecognizedShape
 {
@@ -25,6 +28,9 @@ typedef struct RecognizedShape
 	cv::Rect boundingRect;
 } RecognizedShape;
 
+
+//Applications
+int applicationEmbarquee( int argc, char **argv );
 
 //Utils.cpp
 void MatToTxtFile(cv::Mat image);
@@ -48,11 +54,11 @@ cv::Mat SetBlueMask(cv::Mat hsv);
 cv::Mat SetRedMask(cv::Mat hsv);
 cv::Mat SetCustomMask(cv::Mat hsv, uchar lower[], uchar upper[]);
 
-//main functions
-bool save_image(cv::Mat frame, RecognizedShape shape, std::string color);
+//main.cpp
+bool save_image(cv::Mat frame, RecognizedShape shape, std::string color, int &count);
 bool canSave(time_t &start, time_t &end, int interval);
 float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount);
 void displayRecognizedShapes(cv::Mat &frame, std::vector<RecognizedShape> &shapes);
-void runningThread(int pipeDescriptor);
+
 
 #endif
