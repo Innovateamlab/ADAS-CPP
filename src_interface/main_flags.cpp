@@ -13,8 +13,7 @@ int main(void)
 	int pipeDescriptor = setupNamedPipe(O_RDONLY);
 	char buffer[MAX_BUFFER];
 	
-	
-	for(int i=0;i<5;i++)
+	while(1)
 	{
 		int err = read(pipeDescriptor, buffer, MAX_BUFFER);
 		if(err == -1)
