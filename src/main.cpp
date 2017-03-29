@@ -278,7 +278,7 @@ void runningThread(int pipeDescriptor)
 				break;
 			}
 			
-			sleep(1);
+			sleep(2);
 		}
 	}
 }

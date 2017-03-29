@@ -13,6 +13,7 @@ int main(void)
 	char buffer[MAX_BUFFER];
 	
 	Data data;
+	int delay_ms;
 	
 	while(1)
 	{
@@ -24,13 +25,17 @@ int main(void)
 			return -1;
 		}
 		else
-		{
-
-			digitalWrite (data.flag, HIGH) ;
-			delay(500);
-			digitalWrite (data.flag,  LOW) ; 
-			delay(500);
+		{	
+			delay_ms = 100;
+			if(data.flag == RUNNING)
+				delay_ms = 500;
 			
+			//------------   Version de test temporaire, a enlever rapidement ! ---------------
+			data.flag = RUNNING;
+				
+			digitalWrite (data.flag, HIGH);
+			delay(delay_ms);
+			digitalWrite (data.flag,  LOW);
 			
 			cout << "Received (" << data.flag << ") : "<< data.message << endl;
 		}
