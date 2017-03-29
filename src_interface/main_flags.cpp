@@ -1,13 +1,14 @@
 #include <iostream>
-
+#include <wiringPi.h>
 #include "Flags.hpp"
 
 using namespace std;
 
 #define MAX_BUFFER 1024
-
+void gpioSetup();
 int main(void) 
 {	
+	gpioSetup();
 	int pipeDescriptor = setupNamedPipe(O_RDONLY);
 	char buffer[MAX_BUFFER];
 	
@@ -24,6 +25,18 @@ int main(void)
 		}
 		else
 		{
+			if (data.flag == LIGHT_BLUE){
+				digitalWrite (LIGHT_BLUE, HIGH) ;
+				delay(500);
+				digitalWrite (LIGHT_BLUE,  LOW) ; 
+				delay(500);
+			}
+			else if (data.flag == LIGHT_RED){
+				digitalWrite (LIGHT_RED, HIGH) ;
+				delay(500);
+				digitalWrite (LIGHT_RED,  LOW) ; 
+				delay(500);
+			}
 			cout << "Received (" << data.flag << ") : "<< data.message << endl;
 		}
 	}
@@ -68,3 +81,12 @@ int main(void)
 	
 	unlink(PIPE_FILENAME);
 }
+
+void gpioSetup() //GPIO pins initialisation
+{
+	wiringPiSetup();	
+	pinMode(LIGHT_BLUE, OUTPUT);
+	pinMode(LIGHT_RED, OUTPUT);
+	pinMode(FAIL, OUTPUT);
+}
+

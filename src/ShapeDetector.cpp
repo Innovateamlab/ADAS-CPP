@@ -5,14 +5,12 @@ using namespace cv;
 
 // Our lamps:
 // (These are wiringPi pin numbers)
-#define	RED		0
-#define	BLUE	1
+
 
 
 std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::vector<cv::Point> > contours) 
 {
-	//set led blink param
-	//wiringPiSetup () ;
+	
 	
 	// Find shape
 	cv::Mat img_cropped;
@@ -67,11 +65,7 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 				setLabel(dst, "BLUE RECT", cv::boundingRect(contours[i]));
 				cv::Rect r = cv::boundingRect(approx);
 				cv::Point pt(r.x, r.y);
-				
-				// blink led
-				//digitalWrite (1, HIGH) ; delay (200) ;
-				//digitalWrite (1,  LOW) ; delay (500) ;
-					
+	
 				// Display the rectangle r
 				cv::rectangle(dst,pt,pt+cv::Point(r.width,r.height),CV_RGB(255,0,255),thickness);
 				cv::Mat img_cropped = source(r);
@@ -239,9 +233,6 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 
 std::vector<RecognizedShape> shapeDetectorRed(cv::Mat source, std::vector<std::vector<cv::Point> > contours) 
 {
-	//set led blink param
-	wiringPiSetup () ;
-	pinMode (0, OUTPUT) ;
 	
 	// Find shape
 	cv::Mat img_cropped;

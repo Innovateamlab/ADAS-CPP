@@ -15,11 +15,12 @@ int countRed = 0, countBlue = 0;
 int countGlobal = 0;
 bool usePipe = true;
 bool doSave = true;
+Data data;
 
 bool save_image(cv::Mat frame, RecognizedShape shape, string color);
 bool canSave(time_t &start, time_t &end, int interval);
 float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount);
-void gpioSetup();
+
 void displayRecognizedShapes(cv::Mat &frame, std::vector<RecognizedShape> &shapes);
 
 int main ( int argc, char **argv ) 
@@ -36,7 +37,7 @@ int main ( int argc, char **argv )
 		doSave = false;
 	}
 	
-	gpioSetup();	
+	
 	int pipeDescriptor = setupNamedPipe(O_WRONLY);
 	
 	int nCount=0;
@@ -75,8 +76,7 @@ int main ( int argc, char **argv )
 			time(&begin);
 			if(usePipe)
 			{
-				Data data;
-				data.flag = FAIL;
+				
 				sprintf (data.message, "Save_global");
 				int err = write(pipeDescriptor,&data, sizeof(Data));
 				if(err == -1)
@@ -134,20 +134,17 @@ int main ( int argc, char **argv )
 			
 			if(saveR && usePipe)
 			{
-				write(pipeDescriptor,"0", sizeof("0"));
-				/*
-				digitalWrite (LIGHT_RED, HIGH) ;
-				delay(500);
-				digitalWrite (LIGHT_RED,  LOW) ; 
-				delay(500);		*/
+				data.flag = LIGHT_RED;
+				sprintf (data.message, "Save Red");
+				write(pipeDescriptor,&data, sizeof(Data));
+	
 			}
 			if(saveB&& usePipe)
 			{
-				write(pipeDescriptor,"1", sizeof("1"));
-				/*digitalWrite (LIGHT_BLUE, HIGH) ;
-				delay(500);
-				digitalWrite (LIGHT_BLUE,  LOW) ; 
-				delay(500);*/
+				data.flag = LIGHT_BLUE;
+				sprintf (data.message, "Save Blue");
+				write(pipeDescriptor,&data, sizeof(Data));
+
 			}
 			
 			if(saveR || saveB)
@@ -258,14 +255,6 @@ float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount)
 	cout<< "\nFPS = "<<  fps << endl;
 	time ( &timer_begin );
 	return fps;
-}
-
-void gpioSetup() //GPIO pins initialisation
-{
-	wiringPiSetup();	
-	pinMode(LIGHT_BLUE, OUTPUT);
-	pinMode(LIGHT_RED, OUTPUT);
-	pinMode(FAIL, OUTPUT);
 }
 
 

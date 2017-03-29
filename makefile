@@ -21,7 +21,7 @@ ShapeColorDetector.a: $(OBJS)
 	$(CC) -o $@ $^ $(CFLAGS) -Wl,-rpath,libs/ $(LIBS)
 
 FlagInterface.a: src_interface/main_flags.o
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS) -lwiringPi
 
 #Cleanup
 .PHONY: clean
