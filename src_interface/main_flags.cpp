@@ -6,8 +6,6 @@ using namespace std;
 
 #define MAX_BUFFER 1024
 
-int setupNamedPipe();
-
 int main(void) 
 {	
 	int pipeDescriptor = setupNamedPipe(O_RDONLY);
