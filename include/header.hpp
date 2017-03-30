@@ -31,6 +31,7 @@ typedef struct RecognizedShape
 
 //Applications
 int applicationEmbarquee( int argc, char **argv );
+int applicationDebug( int argc, char **argv );
 
 //Utils.cpp
 void MatToTxtFile(cv::Mat image);

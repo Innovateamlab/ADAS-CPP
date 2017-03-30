@@ -1,5 +1,4 @@
 #include <iostream>
-#include <wiringPi.h>
 #include "Flags.hpp"
 
 using namespace std;

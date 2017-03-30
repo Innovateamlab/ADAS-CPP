@@ -20,7 +20,7 @@ all: ShapeColorDetector.a FlagInterface.a clean
 ShapeColorDetector.a: $(OBJS)
 	$(CC) -o $@ $^ $(CFLAGS) -Wl,-rpath,libs/ $(LIBS)
 
-FlagInterface.a: src_interface/main_flags.o
+FlagInterface.a: src_interface/main_flags.o src/Flags.o
 	$(CC) -o $@ $^ $(CFLAGS) -lwiringPi
 
 #Cleanup
