@@ -9,16 +9,80 @@ string filepathRed = "ImagesSave/Red/imgCropRed_";
 string filepathBlue = "ImagesSave/Blue/imgCropBlue_";
 string fileFormat = ".jpg";
 
+Parameters manageParameters(int argc, char **argv);
+Parameters initParameters();
+
 int main ( int argc, char **argv ) 
 {
+	Parameters parameters = manageParameters(argc, argv);
 	
-	applicationEmbarquee(argc, argv);
+	if(parameters.mode == MODE_EMBARQUE)
+	{
+		applicationEmbarquee(parameters);
+	}
+	else if(parameters.mode == MODE_DEBUG){
+		//applicationDebug(argc,argv);
+	}
+	else if(parameters.mode == MODE_DEVELOPPEMENT){
+		parameters.noPipe = true;
+		parameters.noSave = true;
+		applicationDeveloppement(parameters);
+	}
+	else
+	{
+		cout << "No mode to start \n";  
+	}
+	
 	
 	return 0;
 }
 
 
 /****** Functions *******/
+
+Parameters manageParameters(int argc, char **argv)
+{
+	Parameters parameters = initParameters();
+	
+	for(int i=1; i<argc; i++)
+	{
+		if(string(argv[i]) == "-list"){
+			parameters.list = string(argv[i+1]);
+			parameters.mode = MODE_DEBUG;
+			i+=1;
+		} else if(string(argv[i]) == "-counts") {
+			for(int j=0;j<3;j++) parameters.counts[j] = atoi(argv[i+j+1]);
+			i+=3;
+		} else if(string(argv[i]) == "-debug") {
+			parameters.debug = atoi(argv[i+1]);
+			parameters.mode = MODE_DEVELOPPEMENT;
+			i+=1;
+		} else if(string(argv[i]) == "--noPipe") {
+			parameters.noPipe = true;	
+		} else if(string(argv[i]) == "--noSave") {
+			parameters.noSave = true;
+		} else {
+			cout << "Not a switch" << endl;
+		}
+	}
+	
+	return parameters;
+}
+
+Parameters initParameters()
+{
+	Parameters param;
+	param.mode = MODE_EMBARQUE;
+	param.list = "";
+	for(int i=0;i<3;i++) param.counts[i] = 0;
+	param.debug = 0;
+	param.noPipe = false;
+	param.noSave = false;
+	
+	return param;
+}
+
+
 
 bool save_image(cv::Mat frame, RecognizedShape shape, string color, int &count)
 {

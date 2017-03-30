@@ -15,6 +15,10 @@
 #include </usr/local/include/opencv2/opencv.hpp>
 
 #define DEBUG 0
+#define MODE_EMBARQUE 0
+#define MODE_DEBUG 1
+#define MODE_DEVELOPPEMENT 2
+
 
 extern std::string filepathGlobal;
 extern std::string filepathRed;
@@ -28,9 +32,20 @@ typedef struct RecognizedShape
 	cv::Rect boundingRect;
 } RecognizedShape;
 
+typedef struct Parameters
+{
+	int mode;
+	std::string list;
+	int counts[3];
+	int debug;
+	bool noPipe, noSave;
+} Parameters;
+
+
 
 //Applications
-int applicationEmbarquee( int argc, char **argv );
+int applicationEmbarquee(Parameters parameters);
+int applicationDeveloppement(Parameters parameters) ;
 int applicationDebug( int argc, char **argv );
 
 //Utils.cpp

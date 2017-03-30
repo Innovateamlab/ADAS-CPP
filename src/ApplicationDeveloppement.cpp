@@ -4,9 +4,7 @@
 using namespace std;
 using namespace cv;
 
-
-
-int applicationEmbarquee(Parameters parameters) 
+int applicationDeveloppement(Parameters parameters) 
 {
 	int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 5;
 	int pipeDescriptor = -1;
@@ -69,7 +67,10 @@ int applicationEmbarquee(Parameters parameters)
 		
 		displayRecognizedShapes(image, shapeB);
 		displayRecognizedShapes(image, shapeR);
-
+		
+		imshow("Image", image);
+		waitKey(20);
+		
 		//save image
 		if(!parameters.noSave && canSave(timer_shape, timer_end, INTERVAL_SHAPE))
 		{	

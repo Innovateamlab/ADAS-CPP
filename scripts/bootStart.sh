@@ -10,7 +10,7 @@ sudo /usr/local/bin/gpio export 4 out
 echo launch program...
 cd /home/pi/Documents/ADAS-CPP
 
-sudo ./ShapeColorDetector.a `sudo ls ImagesSave/Red/ | grep ".jpg" | wc -l` `sudo ls ImagesSave/Blue/ | grep ".jpg" | wc -l` `sudo ls ImagesSave/Global/ | grep ".jpg" | wc -l` &
+sudo ./ShapeColorDetector.a -counts `sudo ls ImagesSave/Red/ | grep ".jpg" | wc -l` `sudo ls ImagesSave/Global/ | grep ".jpg" | wc -l` `sudo ls ImagesSave/Blue/ | grep ".jpg" | wc -l` &
 
 sleep 1
 
