@@ -18,9 +18,7 @@
 
 extern char * PIPE_FILENAME;
 
-
 //FLAGS
-
 // 
 typedef struct Data
 {
@@ -31,10 +29,5 @@ typedef struct Data
 //FUNCTIONS
 int setupNamedPipe(int rights);
 void runningThread(int pipeDescriptor);
-
-
-
-
-
 
 #endif

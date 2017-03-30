@@ -4,8 +4,6 @@
 using namespace std;
 using namespace cv;
 
-
-
 int applicationEmbarquee(Parameters parameters) 
 {
 	int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 5;

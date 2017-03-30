@@ -36,9 +36,9 @@ typedef struct Parameters
 {
 	int mode;
 	std::string list;
-	int counts[3];
+	int counts[3];			//0 : RedCounts  1 : GlobalCounts  2 : BlueCounts
 	int debug;
-	bool noPipe, noSave;
+	bool noPipe, noSave, show;
 } Parameters;
 
 
@@ -46,7 +46,7 @@ typedef struct Parameters
 //Applications
 int applicationEmbarquee(Parameters parameters);
 int applicationDeveloppement(Parameters parameters) ;
-int applicationDebug( int argc, char **argv );
+int applicationDebug(Parameters parameters);
 
 //Utils.cpp
 void MatToTxtFile(cv::Mat image);

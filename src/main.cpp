@@ -20,8 +20,11 @@ int main ( int argc, char **argv )
 	{
 		applicationEmbarquee(parameters);
 	}
-	else if(parameters.mode == MODE_DEBUG){
-		//applicationDebug(argc,argv);
+	else if(parameters.mode == MODE_DEBUG)
+	{
+		parameters.noPipe = true;
+		parameters.noSave = true;
+		applicationDebug(parameters);
 	}
 	else if(parameters.mode == MODE_DEVELOPPEMENT){
 		parameters.noPipe = true;
@@ -32,7 +35,6 @@ int main ( int argc, char **argv )
 	{
 		cout << "No mode to start \n";  
 	}
-	
 	
 	return 0;
 }
@@ -61,6 +63,8 @@ Parameters manageParameters(int argc, char **argv)
 			parameters.noPipe = true;	
 		} else if(string(argv[i]) == "--noSave") {
 			parameters.noSave = true;
+		} else if(string(argv[i]) == "--show") {
+			parameters.show = true;
 		} else {
 			cout << "Not a switch" << endl;
 		}
@@ -78,6 +82,7 @@ Parameters initParameters()
 	param.debug = 0;
 	param.noPipe = false;
 	param.noSave = false;
+	param.show = false;
 	
 	return param;
 }

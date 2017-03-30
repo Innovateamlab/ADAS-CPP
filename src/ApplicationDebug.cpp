@@ -4,151 +4,87 @@
 using namespace std; 
 using namespace cv;
 
-/*int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 5;
+string get_image_path(string file_path);
 
-int countRed = 0, countBlue = 0;
-int countGlobal = 0;
+int applicationDebug (Parameters parameters) 
+{	
+	cv::Mat image;
+	string file_path = parameters.list;
+	string path = get_image_path(file_path);
+	string image_name;
+	
+	ifstream fichier(file_path.c_str(), ios::in);
+	
+	while(1)
+	{	
+		if (getline(fichier, image_name))
+		{
+			stringstream image_path;
+			image_path<<image_name;
+			cout<<"Reading image : "<<image_path.str()<<endl; 
+			image = imread(image_path.str()); 
+		}
+		else
+		{
+			fichier.close();
+			break;
+		}
+		// Image preprocessing : get the preprocessed image (in hsv)
+		cv::Mat hsv = preprocessing(image);
+	
+		// Défine range of red and blue color in HSV
+		cv::Mat blueMask = SetBlueMask(hsv);
+		cv::Mat redMask = SetRedMask(hsv);
 
-bool usePipe = true;
-bool doSave = true;
+		// find contours in the thresholded image and initialize the shape detector
+		std::vector<std::vector<cv::Point> > contoursB;
+		findContours(blueMask.clone(), contoursB, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		
+		std::vector<std::vector<cv::Point> > contoursR;
+		findContours(redMask.clone(), contoursR, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		
+		// find shape
+		std::vector<RecognizedShape> shapeB = shapeDetectorBlue(image, contoursB);
+		std::vector<RecognizedShape> shapeR = shapeDetectorRed(image, contoursR);
+		
+		displayRecognizedShapes(image, shapeB);
+		displayRecognizedShapes(image, shapeR);
+		
+		
+		if(parameters.show)
+		{
+			imshow("Image", image);
+			cv::waitKey(0);
+		}
+		
+		//save image
+		if(!parameters.noSave)
+		{	
+			if(shapeR.size() != 0)
+				save_image(image, shapeR[0],"RED", parameters.counts[0]);
+			if(shapeB.size() != 0)
+				save_image(image, shapeB[0],"BLUE", parameters.counts[2]);
+		}
+	}
 
-Data data;
-*/
-int applicationDebug ( int argc, char **argv ) 
+	cout<<"\n Read done"<< endl;
+	
+	return 0;
+}
+
+string get_image_path(string file_path)
 {
-	//if(argc ==  4)
-	//{
-		//countRed = atoi(argv[1]);
-		//countBlue = atoi(argv[2]);
-		//countGlobal = atoi(argv[3]);
-	//}
-	
-	//if(argv[1] == "noSave")
-	//{
-		//doSave = false;
-	//}
+	size_t pos = 0;
+	string delimiter ="/";
+	string result = "";
 	
 	
-	//int pipeDescriptor = setupNamedPipe(O_WRONLY);
-	//runningThread(pipeDescriptor);
-	
-	//int nCount=0;
-	//time_t timer_begin,timer_end;
-	//time_t timer_start_interval = 0, timer_end_interval = 0;
-	//time_t begin = 0, fin = 0;
-	
-	//cv::Mat image;
-	////raspicam::RaspiCam_Cv camera;
-	
-	////set camera params
-	///*camera.set( CV_CAP_PROP_FORMAT, CV_8UC3 ); // CV_8UC3 = frame RGB; CV_8UC1 = frame gray;
-	//camera.set( CV_CAP_PROP_FRAME_WIDTH,  640);
-	//camera.set( CV_CAP_PROP_FRAME_HEIGHT, 480);*/
-	////camera.set(CV_CAP_PROP_FPS, 90);
-	
-
-	///*if (!camera.open()) {cerr<<"Error opening the camera"<<endl; return -1;}
-	//cout<<"Camera opened..."<<endl;*/
-	
-	//time ( &timer_begin ); // Lance le chrono
-	//while(1)
-	//{
-		////Start capture
-		////camera.grab();
-		////camera.retrieve (image);
-		
-		////images from file
-		//stringstream filename_global;
-		//filename_global<<filepathGlobal<<(countGlobal)<<fileFormat;
-		//image = imread(filename_global.str()); 
-		//cout<<"read image "<<(countGlobal)<<endl; 
-		//cv::waitKey(10);
-		//countGlobal ++;
-		
-		////save global
-		///*if (canSave(begin, fin, INTERVAL_GLOBAL))	
-		//{
-			//countGlobal ++;
-			//stringstream filename_global;
-			//filename_global<<filepathGlobal<<(countGlobal)<<fileFormat;
-			//imwrite(filename_global.str(),image);
-			//cout<<"Global image saved at "<<filename_global.str()<<endl;
-			//time(&begin);
-		//}*/
-
-		//// Image preprocessing : get the preprocessed image (in hsv)
-		//cv::Mat hsv = preprocessing(image);
-	
-		//// Défine range of red and blue color in HSV
-		//cv::Mat blueMask = SetBlueMask(hsv);
-		//cv::Mat redMask = SetRedMask(hsv);
-		
-
-//#if	DEBUG>=2
-		//cv::imshow("redmask", redMask);
-		//cv::imshow("bluemask", blueMask);
-		//cv::waitKey(50);
-//#endif
-		//// find contours in the thresholded image and initialize the shape detector
-		//std::vector<std::vector<cv::Point> > contoursB;
-		//findContours(blueMask.clone(), contoursB, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-		
-		//std::vector<std::vector<cv::Point> > contoursR;
-		//findContours(redMask.clone(), contoursR, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-		
-		//// find shape
-		//std::vector<RecognizedShape> shapeB = shapeDetectorBlue(image, contoursB);
-		//std::vector<RecognizedShape> shapeR = shapeDetectorRed(image, contoursR);
-		
-		//displayRecognizedShapes(image, shapeB);
-		//displayRecognizedShapes(image, shapeR);
-		
-//#if	DEBUG>=1
-		////cv::imshow("frame", image);
-		////cv::waitKey(50);
-//#endif
-
-		////save image
-		//if(doSave && canSave(timer_start_interval, timer_end_interval, INTERVAL_SHAPE))
-		//{	
-			//bool saveR = false;
-			//bool saveB = false;
-			
-			////Try to save
-			//if(shapeR.size() != 0)
-				//saveR = save_image(image, shapeR[0],"RED", countRed);
-			//if(shapeB.size() != 0)
-				//saveB = save_image(image, shapeB[0],"BLUE", countBlue);
-			
-			//if(saveR && usePipe)
-			//{
-				//data.flag = LIGHT_RED;
-				//sprintf (data.message, "Save Red");
-				//write(pipeDescriptor,&data, sizeof(Data));
-	
-			//}
-			//if(saveB&& usePipe)
-			//{
-				//data.flag = LIGHT_BLUE;
-				//sprintf (data.message, "Save Blue");
-				//write(pipeDescriptor,&data, sizeof(Data));
-
-			//}
-			
-			//if(saveR || saveB)
-			//{
-				//time ( &timer_start_interval );
-			//}
-		//}
-		
-//#if	DEBUG>=1
-		////show time statistics
-		////getFPS(timer_begin, timer_end, nCount);
-//#endif
-	//}
-
-	//cout<<"\n Read done"<< endl;
-	
-	//return 0;
+	while((pos = file_path.find(delimiter)) != std::string::npos)
+	{
+		result += file_path.substr(0,pos + delimiter.length());
+		file_path = file_path.substr(pos + delimiter.length(), file_path.length());
+	}
+	cout<<"file_path : "<<result<<endl;
+	return result;
 }
 
