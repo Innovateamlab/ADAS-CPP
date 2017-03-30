@@ -12,8 +12,8 @@ string fileFormat = ".jpg";
 int main ( int argc, char **argv ) 
 {
 	
-	applicationEmbarquee(argc, argv);
-	
+	//applicationEmbarquee(argc, argv);
+	applicationDebug(argc, argv);
 	return 0;
 }
 
