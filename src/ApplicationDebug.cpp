@@ -47,9 +47,23 @@ int applicationDebug (Parameters parameters)
 		std::vector<RecognizedShape> shapeB = shapeDetectorBlue(image, contoursB);
 		std::vector<RecognizedShape> shapeR = shapeDetectorRed(image, contoursR);
 		
+		bool saveR = false;
+		bool saveB = false;
+		
+		string filenameR, filenameB;
+		
+		//save image
+		if(!parameters.noSave)
+		{
+			string filenameR, filenameB;	
+			if(shapeR.size() != 0)
+				saveR = save_image(image, shapeR[0],"RED", parameters.counts[0],filenameR);
+			if(shapeB.size() != 0)
+				saveB = save_image(image, shapeB[0],"BLUE", parameters.counts[2],filenameB);
+		}
+		
 		displayRecognizedShapes(image, shapeB);
 		displayRecognizedShapes(image, shapeR);
-		
 		
 		if(parameters.show)
 		{
@@ -57,14 +71,10 @@ int applicationDebug (Parameters parameters)
 			cv::waitKey(0);
 		}
 		
-		//save image
-		if(!parameters.noSave)
-		{	
-			if(shapeR.size() != 0)
-				save_image(image, shapeR[0],"RED", parameters.counts[0]);
-			if(shapeB.size() != 0)
-				save_image(image, shapeB[0],"BLUE", parameters.counts[2]);
-		}
+		if(saveR)
+			imwrite(filenameR + "_marked" + fileFormat,image);
+		if(saveB)
+			imwrite(filenameB + "_marked" + fileFormat,image);
 	}
 
 	cout<<"\n Read done"<< endl;

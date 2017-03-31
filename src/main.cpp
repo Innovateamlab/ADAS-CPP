@@ -28,12 +28,12 @@ int main ( int argc, char **argv )
 	}
 	else if(parameters.mode == MODE_DEVELOPPEMENT){
 		parameters.noPipe = true;
-		parameters.noSave = true;
 		applicationDeveloppement(parameters);
 	}
 	else
 	{
-		cout << "No mode to start \n";  
+		cout << "No mode to start \n";
+		cout << "use -mode <EMB | DBG | DEV> \n";
 	}
 	
 	return 0;
@@ -48,22 +48,42 @@ Parameters manageParameters(int argc, char **argv)
 	
 	for(int i=1; i<argc; i++)
 	{
-		if(string(argv[i]) == "-list"){
+		string command = string(argv[i]);
+		
+		if(command == "-list"){
 			parameters.list = string(argv[i+1]);
 			parameters.mode = MODE_DEBUG;
 			i+=1;
-		} else if(string(argv[i]) == "-counts") {
+		} else if(command == "-counts") {
 			for(int j=0;j<3;j++) parameters.counts[j] = atoi(argv[i+j+1]);
 			i+=3;
-		} else if(string(argv[i]) == "-debug") {
+		} else if(command == "-debug") {
 			parameters.debug = atoi(argv[i+1]);
-			parameters.mode = MODE_DEVELOPPEMENT;
 			i+=1;
-		} else if(string(argv[i]) == "--noPipe") {
+		} else if(command == "-classifier") {
+			parameters.classifier = string(argv[i+1]);
+			i+=1;
+		} else if(command == "-mode") {
+			string subCommand = string(argv[i+1]);
+			
+			if(subCommand == "EMB" || subCommand == "EMBARQUE")
+			{
+				parameters.mode = MODE_EMBARQUE;
+			}
+			else if(subCommand == "DBG" || subCommand == "DEBUG")
+			{
+				parameters.mode = MODE_DEBUG;
+			}
+			else if(subCommand == "DEV" || subCommand == "DEVELOPPEMENT")
+			{
+				parameters.mode = MODE_DEVELOPPEMENT;
+			}
+			i+=1;
+		} else if(command == "--noPipe" || command == "--noPipe") {
 			parameters.noPipe = true;	
-		} else if(string(argv[i]) == "--noSave") {
+		} else if(command == "--noSave" || command == "--nosave") {
 			parameters.noSave = true;
-		} else if(string(argv[i]) == "--show") {
+		} else if(command == "--show") {
 			parameters.show = true;
 		} else {
 			cout << "Not a switch" << endl;
@@ -75,21 +95,22 @@ Parameters manageParameters(int argc, char **argv)
 
 Parameters initParameters()
 {
-	Parameters param;
-	param.mode = MODE_EMBARQUE;
-	param.list = "";
-	for(int i=0;i<3;i++) param.counts[i] = 0;
-	param.debug = 0;
-	param.noPipe = false;
-	param.noSave = false;
-	param.show = false;
+	Parameters parameters;
+	parameters.mode = -1;
+	parameters.list = "";
+	parameters.classifier = "";
+	for(int i=0;i<3;i++) parameters.counts[i] = 0;
+	parameters.debug = 0;
+	parameters.noPipe = false;
+	parameters.noSave = false;
+	parameters.show = false;
 	
-	return param;
+	return parameters;
 }
 
 
 
-bool save_image(cv::Mat frame, RecognizedShape shape, string color, int &count)
+bool save_image(cv::Mat frame, RecognizedShape shape, string color, int &count, string &filename_ptr, bool verbose)
 {
 	stringstream filename;
 	
@@ -101,16 +122,22 @@ bool save_image(cv::Mat frame, RecognizedShape shape, string color, int &count)
 			
 			if(shape.label == "BLUE_RECT")
 			{
-				filename<<filepathBlue<<(count)<<"_RECT"<<fileFormat;
+				filename<<filepathBlue<<(count)<<"_RECT";
+				filename_ptr = filename.str();				//filename without format extension
+				filename<<fileFormat;
 				imwrite(filename.str(),frame);
-				cout<<"Blue image saved at "<<filename.str()<<endl;
+				if(verbose)
+					cout<<"Blue image saved at "<<filename.str()<<endl;
 				return true;
 			}
 			else if(shape.label == "BLUE_CIRC")
 			{
-				filename<<filepathBlue<<(count)<<"_CIRC"<<fileFormat;
+				filename<<filepathBlue<<(count)<<"_CIRC";
+				filename_ptr = filename.str();
+				filename<<fileFormat;
 				imwrite(filename.str(),frame);
-				cout<<"Blue image saved at "<<filename.str()<<endl;
+				if(verbose)
+					cout<<"Blue image saved at "<<filename.str()<<endl;
 				return true;
 			}
 			else
@@ -128,16 +155,22 @@ bool save_image(cv::Mat frame, RecognizedShape shape, string color, int &count)
 			
 			if(shape.label == "RED_TRI")
 			{
-				filename<<filepathRed<<(count)<<"_TRI"<<fileFormat;
+				filename<<filepathRed<<(count)<<"_TRI";
+				filename_ptr = filename.str();				
+				filename<<fileFormat;
 				imwrite(filename.str(),frame);
-				cout<<"Red image saved at "<<filename.str()<<endl;
+				if(verbose)
+					cout<<"Red image saved at "<<filename.str()<<endl;
 				return true;
 			}
 			else if(shape.label == "RED_CIRC")
 			{
-				filename<<filepathRed<<(count)<<"_CIRC"<<fileFormat;
+				filename<<filepathRed<<(count)<<"_CIRC";
+				filename_ptr = filename.str();
+				filename<<fileFormat;
 				imwrite(filename.str(),frame);
-				cout<<"Red image saved at "<<filename.str()<<endl;
+				if(verbose)
+					cout<<"Red image saved at "<<filename.str()<<endl;
 				return true;
 			}
 			else

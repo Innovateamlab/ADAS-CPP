@@ -54,6 +54,12 @@ int applicationDeveloppement(Parameters parameters)
 		cv::Mat blueMask = SetBlueMask(hsv);
 		cv::Mat redMask = SetRedMask(hsv);
 		
+		if(parameters.debug >= 1)
+		{
+			imshow("blueMask", blueMask);
+			imshow("redMask", redMask);
+		}
+		
 		// find contours in the thresholded image and initialize the shape detector
 		std::vector<std::vector<cv::Point> > contoursB;
 		findContours(blueMask.clone(), contoursB, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
@@ -65,23 +71,20 @@ int applicationDeveloppement(Parameters parameters)
 		std::vector<RecognizedShape> shapeB = shapeDetectorBlue(image, contoursB);
 		std::vector<RecognizedShape> shapeR = shapeDetectorRed(image, contoursR);
 		
-		displayRecognizedShapes(image, shapeB);
-		displayRecognizedShapes(image, shapeR);
 		
-		imshow("Image", image);
-		waitKey(20);
+		bool saveR = false;
+		bool saveB = false;
+		
+		string filenameR, filenameB;
 		
 		//save image
 		if(!parameters.noSave && canSave(timer_shape, timer_end, INTERVAL_SHAPE))
-		{	
-			bool saveR = false;
-			bool saveB = false;
-			
+		{		
 			//Try to save
 			if(shapeR.size() != 0)
-				saveR = save_image(image, shapeR[0],"RED", parameters.counts[0]);
+				saveR = save_image(image, shapeR[0],"RED", parameters.counts[0], filenameR);
 			if(shapeB.size() != 0)
-				saveB = save_image(image, shapeB[0],"BLUE", parameters.counts[2]);
+				saveB = save_image(image, shapeB[0],"BLUE", parameters.counts[2], filenameB);
 			
 			if(saveR && !parameters.noPipe)
 			{
@@ -101,6 +104,18 @@ int applicationDeveloppement(Parameters parameters)
 				time ( &timer_shape );
 			}
 		}
+		
+		displayRecognizedShapes(image, shapeB);
+		displayRecognizedShapes(image, shapeR);
+		
+		if(saveR)
+			imwrite(filenameR + "_marked" + fileFormat,image);
+		if(saveB)
+			imwrite(filenameB + "_marked" + fileFormat,image);
+		
+		
+		imshow("Image", image);
+		waitKey(20);
 	}
 	
 	camera.release(); // Close the PiCam device

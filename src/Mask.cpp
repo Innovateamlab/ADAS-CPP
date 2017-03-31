@@ -58,8 +58,8 @@ cv::Mat preprocessing(cv::Mat image_RGB)
 {
 	//Image preprocessing
 	//Median blur
-	cv::Mat blur;
-	medianBlur(image_RGB,blur,3);	 
+	cv::Mat blur = image_RGB;
+	//medianBlur(image_RGB,blur,3);	 
 	//cv::imwrite("raspicam_cv_image_blur.jpg",blur);
     //cout<<"Image saved at raspicam_cv_image_blur.jpg"<<endl;
     

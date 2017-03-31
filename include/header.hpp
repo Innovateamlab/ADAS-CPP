@@ -35,7 +35,7 @@ typedef struct RecognizedShape
 typedef struct Parameters
 {
 	int mode;
-	std::string list;
+	std::string list, classifier;
 	int counts[3];			//0 : RedCounts  1 : GlobalCounts  2 : BlueCounts
 	int debug;
 	bool noPipe, noSave, show;
@@ -71,7 +71,7 @@ cv::Mat SetRedMask(cv::Mat hsv);
 cv::Mat SetCustomMask(cv::Mat hsv, uchar lower[], uchar upper[]);
 
 //main.cpp
-bool save_image(cv::Mat frame, RecognizedShape shape, std::string color, int &count);
+bool save_image(cv::Mat frame, RecognizedShape shape, std::string color, int &count, std::string &filename, bool verbose = true);
 bool canSave(time_t &start, time_t &end, int interval);
 float getFPS(time_t &timer_begin, time_t &timer_end, int &nCount);
 void displayRecognizedShapes(cv::Mat &frame, std::vector<RecognizedShape> &shapes);
