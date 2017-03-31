@@ -28,7 +28,6 @@ int main ( int argc, char **argv )
 	}
 	else if(parameters.mode == MODE_DEVELOPPEMENT){
 		parameters.noPipe = true;
-		parameters.noSave = true;
 		applicationDeveloppement(parameters);
 	}
 	else
