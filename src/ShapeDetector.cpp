@@ -36,12 +36,8 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 			continue;
 
 		/// RECTANGLE
-		if (approx.size() == 4) //&& approx.size() <= 6) 
+		if (approx.size() == 4) 
 		{
-			// Skip little square
-			if (fabs(approx[0].y - approx[1].y) < 200)
-			continue; 
-			
 			// Number of vertices of polygonal curve
 			int vtc = approx.size();
 
@@ -170,7 +166,7 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 				cv::Mat good = dst(R);
 					
 				//4 Resize in 100x100
-				imgC = SetSizeSquareMat(good,100);
+				imgC = SetSizeSquareMat(dst,100);
 				
 				//5 Display image cropped
 				/*cv::imshow("blue rectangle",imgC1);
