@@ -5,7 +5,6 @@ using namespace std;
 using namespace cv;
 
 string get_image_path(string file_path);
-
 int applicationDebug (Parameters parameters) 
 {	
 	cv::Mat image;
@@ -19,10 +18,9 @@ int applicationDebug (Parameters parameters)
 	{	
 		if (getline(fichier, image_name))
 		{
-			stringstream image_path;
-			image_path<<image_name;
-			cout<<"Reading image : "<<image_path.str()<<endl; 
-			image = imread(image_path.str()); 
+			
+			cout<<"Reading image : "<<image_name<<endl; 
+			image = imread(image_name); 
 		}
 		else
 		{
