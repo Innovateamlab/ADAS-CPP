@@ -18,7 +18,6 @@ int applicationDebug (Parameters parameters)
 	{	
 		if (getline(fichier, image_name))
 		{
-			
 			cout<<"Reading image : "<<image_name<<endl; 
 			image = imread(image_name); 
 		}

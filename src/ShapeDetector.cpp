@@ -10,8 +10,6 @@ using namespace cv;
 
 std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::vector<cv::Point> > contours) 
 {
-	
-	
 	// Find shape
 	cv::Mat img_cropped;
 	std::vector<cv::Point> approx;
@@ -22,8 +20,7 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 	std::vector<RecognizedShape> recognizedShapes;
 	RecognizedShape recognizedShape;
 	
-	/*RecognizedShape recognizedShape;
-	recognizedShape.label = "UNKNOWN";*/
+	
 	
 	for (int i = 0; i < contours.size(); i++)
 	{
@@ -77,7 +74,7 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 				//int xvar, yvar = 0;
 				int occurrence = 0;
 				
-				for (int j=0; j<contours.size(); j++)
+				/*for (int j=0; j<contours.size(); j++)
 				{
 					if (contours[i][j].y == maxy)
 						{
@@ -87,7 +84,7 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 							if (xp < 1.05*minx || xp > 0.95*maxx)
 							{
 								xp = maxx;
-								cout << "Carré déjà cadré ! " << endl;
+								//cout << "Carré déjà cadré ! " << endl;
 								break;
 							}
 							
@@ -135,7 +132,7 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 								break;
 							}	
 						} */
-				}
+				//}
 				
 				// Rotate
 				cv::Mat dst = FeatureRotation(img_cropped,r,xp, approx.size());
@@ -145,7 +142,7 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 				
 				// CROP THE ROTATED ROAD SIGN
 				//0 Define label diag size : R(dst)/R(rotated_crop) = R(rotated_crop)/R(RoadSign); R1/R2 = R2/R3
-				int R1, R2, R3 = 1; // R1>R2>R3>0; R3 = (R2 * R2)/R1;  				
+				/*int R1, R2, R3 = 1; // R1>R2>R3>0; R3 = (R2 * R2)/R1;  				
 				cv::Rect s = resizeToSquare(r);			
 				R2 = s.width / sqrt(2);
 				R1 = (dst.size().width) / sqrt(2);
@@ -166,6 +163,7 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 				cv::Mat good = dst(R);
 					
 				//4 Resize in 100x100
+				*/
 				imgC = SetSizeSquareMat(dst,100);
 				
 				//5 Display image cropped

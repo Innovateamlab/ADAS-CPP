@@ -43,8 +43,6 @@ cv::Mat SetCustomMask(cv::Mat hsv, uchar lower[], uchar upper[])
 {
 	cv::Mat mask;
 	
-	cout << "1";
-	
 	cv::Mat colorLower = cv::Mat(1,3,CV_8UC1, lower);
 	cv::Mat colorUpper = cv::Mat(1,3,CV_8UC1,upper);	
 		

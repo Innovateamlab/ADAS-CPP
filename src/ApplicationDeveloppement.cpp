@@ -4,6 +4,10 @@
 using namespace std;
 using namespace cv;
 
+
+
+
+
 int applicationDeveloppement(Parameters parameters) 
 {
 	int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 5;
@@ -16,12 +20,25 @@ int applicationDeveloppement(Parameters parameters)
 		runningThread(pipeDescriptor);
 	}
 	
+	
+	int fpsCount = 0;
 	time_t timer_global = 0;
 	time_t timer_shape = 0;
+	time_t timer_fps = 0;
 	time_t timer_end = 0;
 	
-	cv::Mat image;
+	cv::Mat image, image_gray;
 	raspicam::RaspiCam_Cv camera;
+	vector<Rect> signs, signs_2;
+	
+	CascadeClassifier classifier, classifier_2;
+	if(parameters.classifier != "")
+	{
+		classifier.load(parameters.classifier);
+		classifier_2.load("../cascade_limitation_vitesse.xml");
+	}
+		
+	std::vector<RecognizedShape> shapeB, shapeR;
 	
 	//set camera params
 	camera.set( CV_CAP_PROP_FORMAT, CV_8UC3 ); // CV_8UC3 = frame RGB; CV_8UC1 = frame gray;
@@ -47,29 +64,59 @@ int applicationDeveloppement(Parameters parameters)
 			time(&timer_global);
 		}
 
-		// Image preprocessing : get the preprocessed image (in hsv)
-		cv::Mat hsv = preprocessing(image);
-	
-		// Défine range of red and blue color in HSV
-		cv::Mat blueMask = SetBlueMask(hsv);
-		cv::Mat redMask = SetRedMask(hsv);
-		
-		if(parameters.debug >= 1)
+		if(parameters.classifier == "")
 		{
-			imshow("blueMask", blueMask);
-			imshow("redMask", redMask);
+			// Image preprocessing : get the preprocessed image (in hsv)
+			cv::Mat hsv = preprocessing(image);
+		
+			// Défine range of red and blue color in HSV
+			cv::Mat blueMask = SetBlueMask(hsv);
+			cv::Mat redMask = SetRedMask(hsv);
+			
+			if(parameters.debug >= 2)
+			{
+				imshow("blueMask", blueMask);
+				imshow("redMask", redMask);
+			}
+			
+			// find contours in the thresholded image and initialize the shape detector
+			std::vector<std::vector<cv::Point> > contoursB;
+			findContours(blueMask.clone(), contoursB, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+			
+			std::vector<std::vector<cv::Point> > contoursR;
+			findContours(redMask.clone(), contoursR, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+			
+			// find shape
+			shapeB = shapeDetectorBlue(image, contoursB);
+			shapeR = shapeDetectorRed(image, contoursR);
 		}
-		
-		// find contours in the thresholded image and initialize the shape detector
-		std::vector<std::vector<cv::Point> > contoursB;
-		findContours(blueMask.clone(), contoursB, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-		
-		std::vector<std::vector<cv::Point> > contoursR;
-		findContours(redMask.clone(), contoursR, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-		
-		// find shape
-		std::vector<RecognizedShape> shapeB = shapeDetectorBlue(image, contoursB);
-		std::vector<RecognizedShape> shapeR = shapeDetectorRed(image, contoursR);
+		else
+		{
+			/*cv::Mat hsv = preprocessing(image);
+			cv::Mat blueMask = SetBlueMask(hsv);
+			cv::Mat redMask = SetRedMask(hsv);
+			cv::Mat mask = blueMask + redMask;*/
+			
+			cvtColor(image, image_gray, CV_BGR2GRAY);
+			equalizeHist(image_gray,image_gray);
+			
+			classifier.detectMultiScale(image_gray, signs, 1.12, 5);
+			for(size_t i =0;i<signs.size();i++)
+			{
+				Point center(signs[i].x + signs[i].width*0.5, signs[i].y + signs[i].height*0.5 );
+				float radius = (signs[i].width*0.4 + signs[i].height*0.4) / 2;
+				circle(image, center, radius, Scalar(0,0,255),3 ,8, 0);
+			}
+			
+			classifier_2.detectMultiScale(image_gray, signs_2, 1.12, 5);
+			for(size_t i =0;i<signs.size();i++)
+			{
+				Point center(signs_2[i].x + signs_2[i].width*0.5, signs_2[i].y + signs_2[i].height*0.5 );
+				float radius = (signs_2[i].width*0.4 + signs_2[i].height*0.4) / 2;
+				circle(image, center, radius, Scalar(0,0,255),3 ,8, 0);
+			}
+			
+		}
 		
 		
 		bool saveR = false;
@@ -105,16 +152,23 @@ int applicationDeveloppement(Parameters parameters)
 			}
 		}
 		
-		displayRecognizedShapes(image, shapeB);
-		displayRecognizedShapes(image, shapeR);
+		if(parameters.classifier == "")
+		{
+			displayRecognizedShapes(image, shapeB);
+			displayRecognizedShapes(image, shapeR);
+		}
 		
 		if(saveR)
 			imwrite(filenameR + "_marked" + fileFormat,image);
 		if(saveB)
 			imwrite(filenameB + "_marked" + fileFormat,image);
 		
+		getFPS(timer_fps, timer_end, fpsCount);
 		
-		imshow("Image", image);
+		if(parameters.debug >= 1)
+		{
+			imshow("Image", image);
+		}
 		waitKey(20);
 	}
 	
