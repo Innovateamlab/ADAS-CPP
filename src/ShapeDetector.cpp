@@ -20,8 +20,6 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 	std::vector<RecognizedShape> recognizedShapes;
 	RecognizedShape recognizedShape;
 	
-	
-	
 	for (int i = 0; i < contours.size(); i++)
 	{
 		// Approximate contour with accuracy proportional

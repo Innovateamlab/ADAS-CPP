@@ -10,7 +10,9 @@ using namespace cv;
 
 int applicationDeveloppement(Parameters parameters) 
 {
-	int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 5;
+	cout << "Developpement started" << endl;
+	
+	int INTERVAL_SHAPE = 3, INTERVAL_GLOBAL = 1;
 	int pipeDescriptor = -1;
 	Data data;
 	
@@ -55,7 +57,7 @@ int applicationDeveloppement(Parameters parameters)
 		camera.retrieve (image);
 		
 		//save global
-		if(!parameters.noSave && canSave(timer_global, timer_end, INTERVAL_GLOBAL))	
+		if(canSave(timer_global, timer_end, INTERVAL_GLOBAL))	
 		{
 			parameters.counts[1]++;
 			stringstream filename_global;
@@ -77,6 +79,8 @@ int applicationDeveloppement(Parameters parameters)
 			{
 				imshow("blueMask", blueMask);
 				imshow("redMask", redMask);
+				
+				imwrite("blueMask.jpg",blueMask);
 			}
 			
 			// find contours in the thresholded image and initialize the shape detector
@@ -85,6 +89,20 @@ int applicationDeveloppement(Parameters parameters)
 			
 			std::vector<std::vector<cv::Point> > contoursR;
 			findContours(redMask.clone(), contoursR, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+			
+			if(parameters.debug >= 3)
+			{
+				cv::Mat blueContours = Mat::zeros(image.size(), CV_8UC3);
+				std::vector<Vec4i> hierarchy;
+				
+				for(int i=0;i<contoursB.size();i++)
+				{
+					drawContours(blueContours, contoursB, i, CV_RGB(0,255,0), 2, 8, hierarchy, 0 , Point() );
+				}
+				
+				imshow("blueContours", blueContours);
+				imwrite("blueContours.jpg",blueContours);
+			}
 			
 			// find shape
 			shapeB = shapeDetectorBlue(image, contoursB);

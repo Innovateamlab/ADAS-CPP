@@ -16,7 +16,7 @@
 
 #define DEBUG 0
 #define MODE_EMBARQUE 0
-#define MODE_DEBUG 1
+#define MODE_EVALUATION 1
 #define MODE_DEVELOPPEMENT 2
 
 
@@ -35,18 +35,17 @@ typedef struct RecognizedShape
 typedef struct Parameters
 {
 	int mode;
-	std::string list, classifier;
+	std::string list, classifier, annotation;
 	int counts[3];			//0 : RedCounts  1 : GlobalCounts  2 : BlueCounts
 	int debug;
 	bool noPipe, noSave, show;
 } Parameters;
 
-
-
 //Applications
 int applicationEmbarquee(Parameters parameters);
 int applicationDeveloppement(Parameters parameters) ;
 int applicationDebug(Parameters parameters);
+int applicationEvaluation(Parameters parameters);
 
 //Utils.cpp
 void MatToTxtFile(cv::Mat image);

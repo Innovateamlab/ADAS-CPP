@@ -20,11 +20,11 @@ int main ( int argc, char **argv )
 	{
 		applicationEmbarquee(parameters);
 	}
-	else if(parameters.mode == MODE_DEBUG)
+	else if(parameters.mode == MODE_EVALUATION)
 	{
 		parameters.noPipe = true;
 		parameters.noSave = true;
-		applicationDebug(parameters);
+		applicationEvaluation(parameters);
 	}
 	else if(parameters.mode == MODE_DEVELOPPEMENT){
 		parameters.noPipe = true;
@@ -52,7 +52,7 @@ Parameters manageParameters(int argc, char **argv)
 		
 		if(command == "-list"){
 			parameters.list = string(argv[i+1]);
-			parameters.mode = MODE_DEBUG;
+			parameters.mode = MODE_EVALUATION;
 			i+=1;
 		} else if(command == "-counts") {
 			for(int j=0;j<3;j++) parameters.counts[j] = atoi(argv[i+j+1]);
@@ -63,6 +63,9 @@ Parameters manageParameters(int argc, char **argv)
 		} else if(command == "-classifier") {
 			parameters.classifier = string(argv[i+1]);
 			i+=1;
+		} else if(command == "-annotation") {
+			parameters.annotation = string(argv[i+1]);
+			i+=1;
 		} else if(command == "-mode") {
 			string subCommand = string(argv[i+1]);
 			
@@ -70,23 +73,23 @@ Parameters manageParameters(int argc, char **argv)
 			{
 				parameters.mode = MODE_EMBARQUE;
 			}
-			else if(subCommand == "DBG" || subCommand == "DEBUG")
+			else if(subCommand == "EVA" || subCommand == "EVALUATION")
 			{
-				parameters.mode = MODE_DEBUG;
+				parameters.mode = MODE_EVALUATION;
 			}
 			else if(subCommand == "DEV" || subCommand == "DEVELOPPEMENT")
 			{
 				parameters.mode = MODE_DEVELOPPEMENT;
 			}
 			i+=1;
-		} else if(command == "--noPipe" || command == "--noPipe") {
+		} else if(command == "--noPipe" || command == "--nopipe") {
 			parameters.noPipe = true;	
 		} else if(command == "--noSave" || command == "--nosave") {
 			parameters.noSave = true;
 		} else if(command == "--show") {
 			parameters.show = true;
 		} else {
-			cout << "Not a switch" << endl;
+			cout << command << " is not a switch" << endl;
 		}
 	}
 	
