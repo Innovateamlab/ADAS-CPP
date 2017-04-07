@@ -1,6 +1,7 @@
 #ifndef HEADER_H_INCLUDED
 #define HEADER_H_INCLUDED
 
+#include <sys/time.h>
 #include <ctime>
 #include <cmath>
 #include <fstream>

@@ -4,10 +4,6 @@
 using namespace std;
 using namespace cv;
 
-
-
-
-
 int applicationDeveloppement(Parameters parameters) 
 {
 	cout << "Developpement started" << endl;
@@ -71,6 +67,7 @@ int applicationDeveloppement(Parameters parameters)
 			// Image preprocessing : get the preprocessed image (in hsv)
 			cv::Mat hsv = preprocessing(image);
 		
+
 			// Défine range of red and blue color in HSV
 			cv::Mat blueMask = SetBlueMask(hsv);
 			cv::Mat redMask = SetRedMask(hsv);
@@ -79,8 +76,6 @@ int applicationDeveloppement(Parameters parameters)
 			{
 				imshow("blueMask", blueMask);
 				imshow("redMask", redMask);
-				
-				imwrite("blueMask.jpg",blueMask);
 			}
 			
 			// find contours in the thresholded image and initialize the shape detector
@@ -101,8 +96,8 @@ int applicationDeveloppement(Parameters parameters)
 				}
 				
 				imshow("blueContours", blueContours);
-				imwrite("blueContours.jpg",blueContours);
 			}
+			
 			
 			// find shape
 			shapeB = shapeDetectorBlue(image, contoursB);

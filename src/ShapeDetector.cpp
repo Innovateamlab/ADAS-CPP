@@ -24,7 +24,7 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 	{
 		// Approximate contour with accuracy proportional
 		// to the contour perimeter
-		cv::approxPolyDP(cv::Mat(contours[i]), approx, cv::arcLength(cv::Mat(contours[i]), true)*0.02, true);
+		cv::approxPolyDP(cv::Mat(contours[i]), approx, cv::arcLength(cv::Mat(contours[i]), true)*0.02, true);		
 
 		// Skip small or non-convex objects 
 		if (std::fabs(cv::contourArea(contours[i])) < 1000 || !cv::isContourConvex(approx))
