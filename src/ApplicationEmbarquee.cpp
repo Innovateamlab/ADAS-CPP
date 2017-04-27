@@ -109,13 +109,28 @@ int applicationEmbarquee(Parameters parameters)
 			
 			if(saveR && !parameters.noPipe)
 			{
-				data.flag = LIGHT_RED;
+				if(shapeR[0].label == "RED_CIRC")
+				{
+					data.flag = RED_CIRCLE;
+				}
+				else if(shapeR[0].label == "RED_TRI")
+				{
+					data.flag = RED_TRIANGLE;
+				}
 				sprintf (data.message, "Save Red");
 				write(pipeDescriptor,&data, sizeof(Data));
+				
 			}
 			if(saveB && !parameters.noPipe)
 			{
-				data.flag = LIGHT_BLUE;
+				if(shapeR[0].label == "BLUE_CIRC")
+				{
+					data.flag = BLUE_CIRCLE;
+				}
+				else if(shapeR[0].label == "BLUE_RECT")
+				{
+					data.flag = BLUE_SQUARE;
+				}
 				sprintf (data.message, "Save Blue");
 				write(pipeDescriptor,&data, sizeof(Data));
 			}
