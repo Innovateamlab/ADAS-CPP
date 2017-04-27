@@ -4,7 +4,7 @@ OBJS=$(SRCS:.cpp=.o)
 #OBJ = main.o Mask.o Reshape.o ShapeDetector.o Utils.o
 
 DEPS = include/
-LIBS = -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_objdetect -lrt -lwiringPi -lraspicam -lraspicam_cv -lopencv_imgcodecs -fopenmp
+LIBS = -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_objdetect -lrt  -lraspicam -lraspicam_cv -lopencv_imgcodecs -fopenmp
 CFLAGS = -g -fopenmp
 
 CC = g++
@@ -20,8 +20,8 @@ all: ShapeColorDetector.a FlagInterface.a clean
 ShapeColorDetector.a: $(OBJS)
 	$(CC) -o $@ $^ $(CFLAGS) -Wl,-rpath,libs/ $(LIBS)
 
-FlagInterface.a: src_interface/main_flags.o src/Flags.o
-	$(CC) -o $@ $^ $(CFLAGS) -lwiringPi
+FlagInterface.a: src_interface/main_flags.o src/Flags.o src/Utils_Flags.o
+	$(CC) -o $@ $^ $(CFLAGS) 
 
 #Cleanup
 .PHONY: clean
