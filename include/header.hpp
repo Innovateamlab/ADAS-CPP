@@ -40,6 +40,7 @@ typedef struct Parameters
 	int counts[3];			//0 : RedCounts  1 : GlobalCounts  2 : BlueCounts
 	int debug;
 	bool noPipe, noSave, show;
+	float custom1, custom2;
 } Parameters;
 
 //Applications
@@ -68,6 +69,8 @@ std::vector<RecognizedShape> shapeDetectorRed(cv::Mat source, std::vector<std::v
 cv::Mat preprocessing(cv::Mat image_RGB);
 cv::Mat SetBlueMask(cv::Mat hsv);
 cv::Mat SetRedMask(cv::Mat hsv);
+cv::Mat blueMask_(cv::Mat image, float threshold);
+cv::Mat redMask_(cv::Mat image, float threshold);
 cv::Mat SetCustomMask(cv::Mat hsv, uchar lower[], uchar upper[]);
 
 //main.cpp

@@ -24,13 +24,73 @@ cv::Mat SetBlueMask(cv::Mat hsv)
 	return blueMask;
 }
 
+cv::Mat blueMask_(cv::Mat image, float threshold)
+{
+	Mat_<uchar> mask = Mat::zeros(image.rows, image.cols, CV_8UC1);
+	
+	float red,green,blue;
+
+	Mat_<Vec3b> _I = image.clone();
+	
+	for(int i=0;i<image.rows;i++)
+	{
+		for(int j=0;j<image.cols;j++)
+		{
+			blue = (float) _I(i,j)[0];
+			green = (float) _I(i,j)[1];
+			red = (float) _I(i,j)[2];
+			
+			if(blue/red > threshold && blue/green > threshold)
+				mask(i,j) = 255;
+			else
+				mask(i,j) = 0;
+		}
+	}
+
+ 	
+	return mask;
+}
+
+cv::Mat redMask_(cv::Mat image, float threshold)
+{
+	Mat_<uchar> mask = Mat::zeros(image.rows, image.cols, CV_8UC1);
+	
+	float red,green,blue;
+
+	Mat_<Vec3b> _I = image.clone();
+
+	for(int i=0;i<image.rows;i++)
+	{
+		for(int j=0;j<image.cols;j++)
+		{
+			blue = (float) _I(i,j)[0];
+			green = (float) _I(i,j)[1];
+			red = (float) _I(i,j)[2];
+			
+			if(red/blue > threshold && red/green > threshold)
+				mask(i,j) = 255;
+			else
+				mask(i,j) = 0;
+		}
+	}
+ 	
+	return mask;
+}
+
 
 cv::Mat SetRedMask(cv::Mat hsv)
 {
 	cv::Mat redMask;
 	
+	//Saturation = 0
 	uchar redLower_data[3]= {120,50,50};
 	uchar redUpper_data[3] = {135,255,255};
+	
+	
+	//Saturation = 100
+	/*uchar redLower_data[3]= {122,50,50};
+	uchar redUpper_data[3] = {130,255,255};
+	*/
 	cv::Mat redLower = cv::Mat(1,3,CV_8UC1, redLower_data);
 	cv::Mat redUpper = cv::Mat(1,3,CV_8UC1,redUpper_data);	
 		

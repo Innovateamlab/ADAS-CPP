@@ -18,7 +18,6 @@ int applicationDeveloppement(Parameters parameters)
 		runningThread(pipeDescriptor);
 	}
 	
-	
 	int fpsCount = 0;
 	time_t timer_global = 0;
 	time_t timer_shape = 0;
@@ -42,6 +41,7 @@ int applicationDeveloppement(Parameters parameters)
 	camera.set( CV_CAP_PROP_FORMAT, CV_8UC3 ); // CV_8UC3 = frame RGB; CV_8UC1 = frame gray;
 	camera.set( CV_CAP_PROP_FRAME_WIDTH,  640);
 	camera.set( CV_CAP_PROP_FRAME_HEIGHT, 480);
+	//camera.set( CV_CAP_PROP_SATURATION, 100);
 	//camera.set(CV_CAP_PROP_FPS, 90);
 	
 	if (!camera.open()) {cerr<<"Error opening the camera"<<endl; return -1;}
@@ -67,10 +67,12 @@ int applicationDeveloppement(Parameters parameters)
 			// Image preprocessing : get the preprocessed image (in hsv)
 			cv::Mat hsv = preprocessing(image);
 		
-
 			// Défine range of red and blue color in HSV
 			cv::Mat blueMask = SetBlueMask(hsv);
 			cv::Mat redMask = SetRedMask(hsv);
+			
+			dilate(redMask,redMask, Mat(), Point(2,2));
+			dilate(blueMask,blueMask, Mat(), Point(2,2));
 			
 			if(parameters.debug >= 2)
 			{
@@ -84,20 +86,6 @@ int applicationDeveloppement(Parameters parameters)
 			
 			std::vector<std::vector<cv::Point> > contoursR;
 			findContours(redMask.clone(), contoursR, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-			
-			if(parameters.debug >= 3)
-			{
-				cv::Mat blueContours = Mat::zeros(image.size(), CV_8UC3);
-				std::vector<Vec4i> hierarchy;
-				
-				for(int i=0;i<contoursB.size();i++)
-				{
-					drawContours(blueContours, contoursB, i, CV_RGB(0,255,0), 2, 8, hierarchy, 0 , Point() );
-				}
-				
-				imshow("blueContours", blueContours);
-			}
-			
 			
 			// find shape
 			shapeB = shapeDetectorBlue(image, contoursB);

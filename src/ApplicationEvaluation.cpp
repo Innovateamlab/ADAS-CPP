@@ -70,18 +70,31 @@ int applicationEvaluation (Parameters parameters)
 		
 		// Image preprocessing : get the preprocessed image (in hsv)
 		cv::Mat hsv = preprocessing(image);
-	
+		
 		// Défine range of red and blue color in HSV
 		cv::Mat blueMask = SetBlueMask(hsv);
 		cv::Mat redMask = SetRedMask(hsv);
+		
+		//cv::Mat redMask = redMask_(image, parameters.custom1);
+		//cv::Mat blueMask = blueMask_(image, parameters.custom2);
+		
+		dilate(redMask,redMask, Mat(), Point(2,2));
+		dilate(blueMask,blueMask, Mat(), Point(2,2));
+		
+		if(parameters.debug >= 2)
+		{
+			imshow("blueMask", blueMask);
+			imshow("redMask", redMask);
+		}	
 
 		// find contours in the thresholded image and initialize the shape detector
 		std::vector<std::vector<cv::Point> > contoursB;
-		findContours(blueMask.clone(), contoursB, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		findContours(blueMask.clone(), contoursB, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE); 
 		
 		std::vector<std::vector<cv::Point> > contoursR;
 		findContours(redMask.clone(), contoursR, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 		
+		//std::vector<std::vector<cv::Point> > contoursR;
 		// find shape
 		std::vector<RecognizedShape> shapeB = shapeDetectorBlue(image, contoursB);
 		std::vector<RecognizedShape> shapeR = shapeDetectorRed(image, contoursR);
@@ -95,9 +108,13 @@ int applicationEvaluation (Parameters parameters)
 			classifier.detectMultiScale(image_gray, signs, 1.12, 5);
 			for(size_t i =0;i<signs.size();i++)
 			{
-				Point center(signs[i].x + signs[i].width*0.5, signs[i].y + signs[i].height*0.5 );
-				float radius = (signs[i].width*0.4 + signs[i].height*0.4) / 2;
-				circle(image, center, radius, Scalar(0,0,255),3 ,8, 0);
+				RecognizedShape recognizedShape;
+				
+				recognizedShape.matrix = image(signs[i]);
+				recognizedShape.label = "RED_CIRC";
+				recognizedShape.boundingRect = signs[i];
+				
+				shapeR.push_back(recognizedShape);
 			}
 		}
 		

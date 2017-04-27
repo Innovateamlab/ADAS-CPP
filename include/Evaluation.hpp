@@ -60,6 +60,8 @@ Result getDectectionResult(std::vector<cv::Rect> trueRects, std::vector<cv::Rect
 	Result result = initResult();
 	std::vector<int> associations;
 	double minScore, currentScore, bestRect;
+	int associationCount = 0;
+	
 	
 	if(detectionRects.size() == 0 && trueRects.size() == 0)
 	{
@@ -85,6 +87,7 @@ Result getDectectionResult(std::vector<cv::Rect> trueRects, std::vector<cv::Rect
 		{
 			//associations.push_back(bestRect);
 			result.truePositives +=1;
+			associationCount++;
 		}
 		else
 		{
@@ -93,9 +96,9 @@ Result getDectectionResult(std::vector<cv::Rect> trueRects, std::vector<cv::Rect
 		}
 	}
 	
-	if(detectionRects.size() > trueRects.size())
+	if(associationCount <= detectionRects.size())
 	{
-		result.falsePositives += detectionRects.size() - trueRects.size();
+		result.falsePositives += detectionRects.size() - associationCount;
 	}
 	
 	return result;

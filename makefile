@@ -4,8 +4,8 @@ OBJS=$(SRCS:.cpp=.o)
 #OBJ = main.o Mask.o Reshape.o ShapeDetector.o Utils.o
 
 DEPS = include/
-LIBS = -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_objdetect -lrt -lwiringPi -lraspicam -lraspicam_cv -lopencv_imgcodecs
-CFLAGS = -g
+LIBS = -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_objdetect -lrt -lwiringPi -lraspicam -lraspicam_cv -lopencv_imgcodecs -fopenmp
+CFLAGS = -g -fopenmp
 
 CC = g++
 

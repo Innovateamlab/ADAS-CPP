@@ -1,5 +1,6 @@
 #include "header.hpp"
 //#include "Flags.hpp"
+#include <omp.h>
 
 using namespace std;
 using namespace cv;
@@ -13,7 +14,7 @@ Parameters manageParameters(int argc, char **argv);
 Parameters initParameters();
 
 int main ( int argc, char **argv ) 
-{
+{	
 	Parameters parameters = manageParameters(argc, argv);
 	
 	if(parameters.mode == MODE_EMBARQUE)
@@ -82,6 +83,12 @@ Parameters manageParameters(int argc, char **argv)
 				parameters.mode = MODE_DEVELOPPEMENT;
 			}
 			i+=1;
+		} else if(command == "-custom1") {
+			parameters.custom1 = atof(argv[i+1]);
+			i+=1;
+		} else if(command == "-custom2") {
+			parameters.custom2 = atof(argv[i+1]);
+			i+=1;
 		} else if(command == "--noPipe" || command == "--nopipe") {
 			parameters.noPipe = true;	
 		} else if(command == "--noSave" || command == "--nosave") {
@@ -107,6 +114,8 @@ Parameters initParameters()
 	parameters.noPipe = false;
 	parameters.noSave = false;
 	parameters.show = false;
+	parameters.custom1 = 0;
+	parameters.custom2 = 0;
 	
 	return parameters;
 }
