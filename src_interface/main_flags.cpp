@@ -57,28 +57,28 @@ int main(void)
 				drawRectangle(2,2,7,7,tx,4);
 				drawRectangle(3,3,6,6,tx,7);
 				transfer(fd, tx);
-				sleep(5);
+				sleep(1);
 			}
 			else if(data.flag == BLUE_CIRCLE)
 			{
 				drawLargeCircle(tx, 4);
 				drawInternCircle(tx,7);
 				transfer(fd, tx);
-				sleep(5);
+				sleep(1);
 			}
 			else if(data.flag == RED_CIRCLE)
 			{
 				drawLargeCircle(tx, 1);
 				drawInternCircle(tx,7);
 				transfer(fd, tx);
-				sleep(5);
+				sleep(1);
 			}
 			else if(data.flag == RED_TRIANGLE)
 			{
 				drawLargeTriangle(tx, 1);
 				drawInternTriangle(tx, 7);
 				transfer(fd, tx);
-				sleep(5);
+				sleep(1);
 			}
 			
 			vClear(fd, tx);
