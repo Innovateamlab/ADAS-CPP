@@ -148,6 +148,12 @@ int applicationEmbarquee(Parameters parameters)
 			imwrite(filenameR + "_marked" + fileFormat,image);
 		if(saveB)
 			imwrite(filenameB + "_marked" + fileFormat,image);
+			
+		if(parameters.show)
+		{
+			imshow("image", image);
+			waitKey(1);
+		}
 	}
 	
 	camera.release(); // Close the PiCam device

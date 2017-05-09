@@ -28,7 +28,7 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 		cv::approxPolyDP(cv::Mat(contours[i]), approx, cv::arcLength(cv::Mat(contours[i]), true)*0.02, true);		
 
 		// Skip small or non-convex objects 
-		if (std::fabs(cv::contourArea(approx)) < 200 || !cv::isContourConvex(approx))
+		if (std::fabs(cv::contourArea(approx)) < 300 || !cv::isContourConvex(approx))
 			continue;
 
 		Rect boundingRect = cv::boundingRect(approx);
@@ -49,9 +49,8 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 		{	
 			double area = cv::contourArea(approx);
 			int radius = boundingRect.width / 2;
-			float ar = boundingRect.width/boundingRect.height;
 
-			if (std::abs(1 - ((double)boundingRect.width / boundingRect.height)) <= 0.2 && std::abs(1 - (area / (CV_PI * std::pow(radius, 2)))) <= 0.2 && ar >= 0.98 && ar <= 1.02)
+			if (std::abs(1 - ((double)boundingRect.width / boundingRect.height)) <= 0.2 && std::abs(1 - (area / (CV_PI * std::pow(radius, 2)))) <= 0.2)
 			{
 				recognizedShape.matrix = img_cropped;
 				recognizedShape.label = "BLUE_CIRC";
@@ -81,7 +80,7 @@ std::vector<RecognizedShape> shapeDetectorRed(cv::Mat source, std::vector<std::v
 	{
 		cv::approxPolyDP(cv::Mat(contours[i]), approx, cv::arcLength(cv::Mat(contours[i]), true)*0.04, true);
 
-		if (std::fabs(cv::contourArea(approx)) < 200 || !cv::isContourConvex(approx))
+		if (std::fabs(cv::contourArea(approx)) < 300 || !cv::isContourConvex(approx))
 			continue;
 			
 		Rect boundingRect = cv::boundingRect(approx);
@@ -96,14 +95,13 @@ std::vector<RecognizedShape> shapeDetectorRed(cv::Mat source, std::vector<std::v
 			
 			recognizedShapes.push_back(recognizedShape);
 		}
+		//Cercle
 		else
 		{
 			double area = cv::contourArea(approx);
 			int radius = boundingRect.width / 2;
-		
-			float ar = boundingRect.width/boundingRect.height;
 
-			if (std::abs(1 - ((double)boundingRect.width / boundingRect.height)) <= 0.2 && std::abs(1 - (area / (CV_PI * std::pow(radius, 2)))) <= 0.2 && ar >= 0.98 && ar <= 1.02)
+			if (abs(1 - ((double)boundingRect.width / boundingRect.height)) <= 0.2 && abs(1 - (area / (CV_PI * radius * radius))) <= 0.2)
 			{
 				recognizedShape.matrix = img_cropped;
 				recognizedShape.label = "RED_CIRC";
@@ -123,6 +121,13 @@ bool isTriangle(Mat &source, std::vector<cv::Point> &approx, std::vector<std::ve
 	if (approx.size() == 3)
 	{
 		//Autres conditions
+		
+		//Equilateral
+		double norm1 = sqrt((approx[0].x-approx[1].x)*(approx[0].x-approx[1].x) + (approx[0].y-approx[1].y)*(approx[0].y-approx[1].y));
+		double norm2 = sqrt((approx[1].x-approx[2].x)*(approx[1].x-approx[2].x) + (approx[1].y-approx[2].y)*(approx[1].y-approx[2].y));
+		double norm3 = sqrt((approx[2].x-approx[0].x)*(approx[2].x-approx[0].x) + (approx[2].y-approx[0].y)*(approx[2].y-approx[0].y));
+		if(abs(norm1-norm2) > 0.2*norm1 || abs(norm2-norm3) > 0.2*norm1 || abs(norm3-norm1) > 0.2*norm1)
+			return false;
 		
 		return true;
 	}
