@@ -28,14 +28,14 @@ int applicationDeveloppement(Parameters parameters)
 	raspicam::RaspiCam_Cv camera;
 	vector<Rect> signs, signs_2;
 	
-	CascadeClassifier classifier, classifier_2;
+	CascadeClassifier classifier_0, classifier_1, classifier_2, classifier_3;
 	if(parameters.classifier != "")
 	{
-		classifier.load(parameters.classifier);
-		classifier_2.load("../cascade_limitation_vitesse.xml");
+		classifier_0.load("./classifiers/cascade_limitation_vitesse.xml");
+		classifier_1.load("./classifiers/cascade_triangles.xml");
+		classifier_2.load("./classifiers/cascade_cercle_bleu.xml");
+		classifier_3.load("./classifiers/cascade_rectangle.xml");
 	}
-		
-	std::vector<RecognizedShape> shapeB, shapeR;
 	
 	//set camera params
 	camera.set( CV_CAP_PROP_FORMAT, CV_8UC3 ); // CV_8UC3 = frame RGB; CV_8UC1 = frame gray;
@@ -48,6 +48,8 @@ int applicationDeveloppement(Parameters parameters)
 	
 	while(1)
 	{
+		std::vector<RecognizedShape> shapeB, shapeR;
+		
 		//Start capture
 		camera.grab();
 		camera.retrieve (image);
@@ -93,30 +95,19 @@ int applicationDeveloppement(Parameters parameters)
 		}
 		else
 		{
-			/*cv::Mat hsv = preprocessing(image);
-			cv::Mat blueMask = SetBlueMask(hsv);
-			cv::Mat redMask = SetRedMask(hsv);
-			cv::Mat mask = blueMask + redMask;*/
-			
 			cvtColor(image, image_gray, CV_BGR2GRAY);
 			equalizeHist(image_gray,image_gray);
 			
-			classifier.detectMultiScale(image_gray, signs, 1.12, 5);
-			for(size_t i =0;i<signs.size();i++)
-			{
-				Point center(signs[i].x + signs[i].width*0.5, signs[i].y + signs[i].height*0.5 );
-				float radius = (signs[i].width*0.4 + signs[i].height*0.4) / 2;
-				circle(image, center, radius, Scalar(0,0,255),3 ,8, 0);
-			}
+			std::vector<RecognizedShape> list_0 = applyClassifier(classifier_0, "RED_CIRC", image_gray, image);
+			std::vector<RecognizedShape> list_1 = applyClassifier(classifier_1, "RED_TRI", image_gray, image);
+			std::vector<RecognizedShape> list_2 = applyClassifier(classifier_2, "BLUE_CIRC", image_gray, image);
+			std::vector<RecognizedShape> list_3 = applyClassifier(classifier_3, "BLUE_RECT", image_gray, image);
+		
+			shapeR.insert(shapeR.end(), list_0.begin(), list_0.end());
+			shapeR.insert(shapeR.end(), list_1.begin(), list_1.end());
 			
-			classifier_2.detectMultiScale(image_gray, signs_2, 1.12, 5);
-			for(size_t i =0;i<signs.size();i++)
-			{
-				Point center(signs_2[i].x + signs_2[i].width*0.5, signs_2[i].y + signs_2[i].height*0.5 );
-				float radius = (signs_2[i].width*0.4 + signs_2[i].height*0.4) / 2;
-				circle(image, center, radius, Scalar(0,0,255),3 ,8, 0);
-			}
-			
+			shapeB.insert(shapeB.end(), list_2.begin(), list_2.end());
+			shapeB.insert(shapeB.end(), list_3.begin(), list_3.end());
 		}
 		
 		
@@ -153,11 +144,11 @@ int applicationDeveloppement(Parameters parameters)
 			}
 		}
 		
-		if(parameters.classifier == "")
-		{
-			displayRecognizedShapes(image, shapeB);
-			displayRecognizedShapes(image, shapeR);
-		}
+		//if(parameters.classifier == "")
+		//{
+		displayRecognizedShapes(image, shapeB);
+		displayRecognizedShapes(image, shapeR);
+		//}
 		
 		if(saveR)
 			imwrite(filenameR + "_marked" + fileFormat,image);

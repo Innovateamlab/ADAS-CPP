@@ -153,4 +153,23 @@ bool isSquare(Mat &source, std::vector<cv::Point> &approx, std::vector<std::vect
 	return false;
 }
 
+std::vector<RecognizedShape> applyClassifier(CascadeClassifier &classifier, string label, Mat &image_gray, Mat &image_color)
+{
+	std::vector<RecognizedShape> list;
+	RecognizedShape recognizedShape;
+	vector<Rect> signs;
+	
+	classifier.detectMultiScale(image_gray, signs, 1.12, 5);
+	for(size_t i =0;i<signs.size();i++)
+	{
+		recognizedShape.matrix = image_color(signs[i]);
+		recognizedShape.label = label;
+		recognizedShape.boundingRect = signs[i];
+		
+		list.push_back(recognizedShape);
+	}
+	
+	return list;
+}
+
 

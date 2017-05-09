@@ -65,6 +65,7 @@ cv::Mat FeatureRotation(cv::Mat img_cropped, cv::Rect s, int x_p, int NbCorners)
 //ShapeDetector.cpp
 std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::vector<cv::Point> > contours);
 std::vector<RecognizedShape> shapeDetectorRed(cv::Mat source, std::vector<std::vector<cv::Point> > contours); 
+std::vector<RecognizedShape> applyClassifier(cv::CascadeClassifier &classifier, std::string label, cv::Mat &image_gray, cv::Mat &image_color);
 
 //Mask.cpp
 cv::Mat preprocessing(cv::Mat image_RGB);
