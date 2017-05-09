@@ -118,21 +118,31 @@ int applicationEmbarquee(Parameters parameters)
 					data.flag = RED_TRIANGLE;
 				}
 				sprintf (data.message, "Save Red");
-				write(pipeDescriptor,&data, sizeof(Data));
+				if(write(pipeDescriptor,&data, sizeof(Data)) < 0)
+				{
+					char buffer[256];
+					char * message = strerror_r(errno, buffer, 256);
+					printf("Error (write) : %s\n",message);
+				} 
 				
 			}
-			if(saveB && !parameters.noPipe)
+			else if(saveB && !parameters.noPipe)
 			{
-				if(shapeR[0].label == "BLUE_CIRC")
+				if(shapeB[0].label == "BLUE_CIRC")
 				{
 					data.flag = BLUE_CIRCLE;
 				}
-				else if(shapeR[0].label == "BLUE_RECT")
+				else if(shapeB[0].label == "BLUE_RECT")
 				{
 					data.flag = BLUE_SQUARE;
 				}
 				sprintf (data.message, "Save Blue");
-				write(pipeDescriptor,&data, sizeof(Data));
+				if(write(pipeDescriptor,&data, sizeof(Data)) < 0)
+				{
+					char buffer[256];
+					char * message = strerror_r(errno, buffer, 256);
+					printf("Error (write) : %s\n",message);
+				}
 			}
 			
 			if(saveR || saveB)

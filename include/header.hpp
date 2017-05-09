@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include </usr/local/include/opencv2/opencv.hpp>
+#include <errno.h>
 
 #define DEBUG 0
 #define MODE_EMBARQUE 0
