@@ -33,6 +33,10 @@ std::vector<RecognizedShape> shapeDetectorBlue(cv::Mat source, std::vector<std::
 
 		Rect boundingRect = cv::boundingRect(approx);
 		boundingRect = resizeToSquare(boundingRect);
+		
+		if(boundingRect.width <= 0.15*source.cols)
+			continue;
+		
 		Mat img_cropped = source(boundingRect);
 
 		/// Square
@@ -85,6 +89,10 @@ std::vector<RecognizedShape> shapeDetectorRed(cv::Mat source, std::vector<std::v
 			
 		Rect boundingRect = cv::boundingRect(approx);
 		boundingRect = resizeToSquare(boundingRect);
+		
+		if(boundingRect.width <= 0.15*source.cols)
+			continue;
+		
 		Mat img_cropped = source(boundingRect);
 	
 		if(isTriangle(source,approx,contours)){
